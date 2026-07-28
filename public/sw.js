@@ -17,8 +17,12 @@ self.addEventListener('push', e => {
         body: payload.body,
         icon: payload.icon || '/vite.svg',
         badge: payload.badge || '/vite.svg',
-        vibrate: payload.vibrate || [200, 100, 200, 100, 500, 100, 200],
-        requireInteraction: true // Buộc tương tác
+        vibrate: payload.vibrate || [500, 250, 500, 250, 500],
+        requireInteraction: true, // Buộc tương tác
+        silent: false, // Hủy chế độ im lặng
+        renotify: true, // Báo lại mỗi lần gọi
+        tag: 'emergency-alert', // Nhóm chung để renotify có tác dụng
+        priority: 'high', // Ưu tiên cho một số OS hỗ trợ
     };
 
     e.waitUntil(

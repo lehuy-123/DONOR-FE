@@ -72,8 +72,12 @@ const DonorView = () => {
                         body: `${latestMsg.sender || 'Tuyến Trên'} đang rất cần máu ${user?.bloodType} của bạn. VUI LÒNG ĐẾN NGAY!`,
                         icon: '/vite.svg',
                         badge: '/vite.svg',
-                        vibrate: [200, 100, 200, 100, 500, 100, 200],
-                        requireInteraction: true
+                        vibrate: [500, 250, 500, 250, 500],
+                        requireInteraction: true,
+                        silent: false,
+                        renotify: true,
+                        tag: 'emergency-socket',
+                        priority: 'high'
                     };
                     if ('serviceWorker' in navigator) {
                        navigator.serviceWorker.ready.then(reg => reg.showNotification(title, options));
