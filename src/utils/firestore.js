@@ -9,6 +9,10 @@ export const loginOrRegisterDonor = async (userData) => {
             body: JSON.stringify(userData)
         });
         const data = await response.json();
+        if (data.error) {
+            alert(data.error);
+            return null;
+        }
         return data.user;
     } catch(e) {
         console.error("Lỗi Đăng nhập Backend:", e);
