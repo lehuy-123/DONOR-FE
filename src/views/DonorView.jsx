@@ -85,10 +85,22 @@ const DonorView = () => {
          }
     };
     
+    // Xử lý buộc đăng xuất khi bị thiết bị khác đăng nhập
+    const forceLogoutListener = (latestToken) => {
+        const localMe = JSON.parse(localStorage.getItem('me_donor'));
+        if (localMe && localMe.sessionToken && localMe.sessionToken !== latestToken) {
+            alert('Tài khoản của bạn vừa đăng nhập ở một máy khác! Bạn sẽ bị đăng xuất khỏi thiết bị này.');
+            localStorage.removeItem('me_donor');
+            window.location.reload();
+        }
+    };
+    
     socket.on('receive-message', messageListener);
+    socket.on('force-logout', forceLogoutListener);
     
     return () => {
         socket.off('receive-message', messageListener);
+        socket.off('force-logout', forceLogoutListener);
     };
   }, [user?.id, user?.bloodType]);
 
