@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://donor-be.onrender.com/api';
 
 // Đăng nhập hoặc Đăng ký (Dựa vào Email) - Đồng bộ Data
 export const loginOrRegisterDonor = async (userData) => {

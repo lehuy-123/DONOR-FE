@@ -5,7 +5,7 @@ import { loginOrRegisterDonor, updateDonorProfile } from '../utils/firestore';
 import { io } from "socket.io-client";
 
 // Khởi tạo Socket.io client kết nối tới Node.js Backend
-const socket = io("http://localhost:5000");
+const socket = io("https://donor-be.onrender.com");
 
 const DonorView = () => {
   const { fcmToken, permission, requestPermissionAndGetToken } = useWebPush();
@@ -44,7 +44,7 @@ const DonorView = () => {
     if (!user?.id) return;
 
     // Lấy lịch sử chat bằng REST API
-    fetch(`http://localhost:5000/api/users/${user.id}/chats`)
+    fetch(`https://donor-be.onrender.com/api/users/${user.id}/chats`)
        .then(res => res.json())
        .then(data => {
            if (data.chats) {
@@ -99,7 +99,7 @@ const DonorView = () => {
     setChatMessage("");
     
     // Gửi chat bằng REST API
-    await fetch(`http://localhost:5000/api/users/${user.id}/chats`, {
+    await fetch(`https://donor-be.onrender.com/api/users/${user.id}/chats`, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ text, sender: 'donor', hospitalId: selectedHospitalId })
@@ -111,7 +111,7 @@ const DonorView = () => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async (event) => {
-      await fetch(`http://localhost:5000/api/users/${user.id}/chats`, {
+      await fetch(`https://donor-be.onrender.com/api/users/${user.id}/chats`, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ text: "📷 Hình ảnh từ rà soát", sender: 'donor', hospitalId: selectedHospitalId, image: event.target.result })

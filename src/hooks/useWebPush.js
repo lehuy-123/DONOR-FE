@@ -14,7 +14,7 @@ export const useWebPush = () => {
       }
 
       // Đăng ký Service Worker & lấy VAPID key
-      const res = await fetch('http://localhost:5000/api/vapid-key');
+      const res = await fetch('https://donor-be.onrender.com/api/vapid-key');
       const { publicKey } = await res.json();
 
       const registration = await navigator.serviceWorker.ready;

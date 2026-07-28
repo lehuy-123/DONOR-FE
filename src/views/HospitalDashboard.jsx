@@ -4,7 +4,7 @@ import { generateMockData } from '../utils/firestore';
 import { io } from "socket.io-client";
 
 // Khởi tạo Socket.io client kết nối tới Node.js Backend
-const socket = io("http://localhost:5000");
+const socket = io("https://donor-be.onrender.com");
 const HOSPITALS = [
   { id: 'choray', name: 'Bệnh Viện Chợ Rẫy', lat: 10.7583, lng: 106.6570, color: 'from-blue-700 to-blue-900' },
   { id: 'nd115', name: 'Nhân Dân 115', lat: 10.7758, lng: 106.6666, color: 'from-emerald-700 to-emerald-900' },
@@ -113,7 +113,7 @@ const HospitalDashboard = () => {
   const fetchInbox = async () => {
      if(!hospitalUser) return;
      try {
-       const res = await fetch(`http://localhost:5000/api/users/scan?bloodType=all`);
+       const res = await fetch(`https://donor-be.onrender.com/api/users/scan?bloodType=all`);
        const data = await res.json();
        const usersWithChats = [];
        (data.donors || []).forEach(userData => {
@@ -157,7 +157,7 @@ const HospitalDashboard = () => {
   // Nạp lịch sử từ Backend mỗi khi mở Profile Modal
   useEffect(() => {
      if (!selectedDonor) return;
-     fetch(`http://localhost:5000/api/users/${selectedDonor.id}/chats`)
+     fetch(`https://donor-be.onrender.com/api/users/${selectedDonor.id}/chats`)
         .then(res => res.json())
         .then(data => setMessages(data.chats || []))
         .catch(e => console.error(e));
@@ -206,7 +206,7 @@ const HospitalDashboard = () => {
 
     const text = chatMessage;
     setChatMessage("");
-    await fetch(`http://localhost:5000/api/users/${selectedDonor.id}/chats`, {
+    await fetch(`https://donor-be.onrender.com/api/users/${selectedDonor.id}/chats`, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ text, sender: hospitalUser.name, hospitalId: hospitalUser.id })
@@ -218,7 +218,7 @@ const HospitalDashboard = () => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async (event) => {
-      await fetch(`http://localhost:5000/api/users/${selectedDonor.id}/chats`, {
+      await fetch(`https://donor-be.onrender.com/api/users/${selectedDonor.id}/chats`, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ text: "📷 Hình ảnh Y khoa đính kèm", sender: hospitalUser.name, hospitalId: hospitalUser.id, image: event.target.result })
@@ -235,7 +235,7 @@ const HospitalDashboard = () => {
     if(!window.confirm(`Phát lệnh báo động khẩn cấp tới thiết bị của ${donor.name}?`)) return;
     
     try {
-      const res = await fetch("http://localhost:5000/api/emergency/push", {
+      const res = await fetch("https://donor-be.onrender.com/api/emergency/push", {
          method: "POST",
          headers: { "Content-Type": "application/json" },
          body: JSON.stringify({
