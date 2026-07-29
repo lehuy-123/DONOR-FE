@@ -1,7 +1,7 @@
 {
   "name": "BloodConnect - Mạng Lưới Hiến Máu",
   "short_name": "BloodConnect",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ef4444",
