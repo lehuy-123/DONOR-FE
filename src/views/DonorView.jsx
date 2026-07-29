@@ -428,7 +428,7 @@ const DonorView = () => {
 
       <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 px-2 gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Mỗi giọt máu trao đi - Một cuộc đời ở lại</h1>
+          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Nối Dòng Máu Việt</h1>
           <p className="text-sm font-medium text-slate-500 flex items-center gap-2 mt-1">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
             Trực tuyến - Mạng lưới Hiến Máu Khẩn Cấp Bệnh Viện
