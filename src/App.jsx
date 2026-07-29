@@ -15,7 +15,7 @@ function App() {
                 🩸
               </div>
               <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-red-500 text-2xl tracking-tight leading-none">
-                Chẻ em
+                BloodBridge
               </span>
             </div>
             <div className="flex space-x-2 h-full py-4">
