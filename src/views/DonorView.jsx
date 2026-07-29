@@ -131,21 +131,39 @@ const DonorView = () => {
 
 
 
-  const handleAuth = async (e) => {
+  const handleAuth = (e) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      // Nhồi chung location nếu GPS đã bắt được trước khi click login
-      const dbUser = await loginOrRegisterDonor({ ...loginData, location });
-      localStorage.setItem('me_donor', JSON.stringify(dbUser));
-      setUser(dbUser);
-      
-      // Kích hoạt cập nhật ép buộc lại vị trí và update thẳng vào record DB vừa tạo
-      updateLocation(dbUser.id || dbUser._id, true);
-    } catch (e) {
-      alert("Lệnh API thất bại!");
-    } finally {
-      setLoading(false);
+
+    const proceedLogin = async (finalLocation) => {
+      try {
+        const dbUser = await loginOrRegisterDonor({ ...loginData, location: finalLocation });
+        localStorage.setItem('me_donor', JSON.stringify(dbUser));
+        setUser(dbUser);
+        
+        // Vẫn gọi lại để cập nhật state hoặc fallback nếu cần
+        updateLocation(dbUser.id || dbUser._id, true);
+      } catch (err) {
+        alert("Lệnh API thất bại!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // ĐẶC BIỆT CHO IOS/SAFARI: Phải gọi getCurrentPosition NGAY LẬP TỨC trong cùng 1 tick của event onClick.
+    // Nếu dùng await fetch() trước, iOS sẽ hủy bỏ User Gesture và block quyền truy cập GPS.
+    if (navigator.geolocation && !location) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          proceedLogin({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        },
+        (err) => {
+          proceedLogin(location || null);
+        },
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 }
+      );
+    } else {
+      proceedLogin(location || null);
     }
   };
 
