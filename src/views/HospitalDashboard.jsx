@@ -521,8 +521,8 @@ const HospitalDashboard = () => {
           
           {/* MODAL CHI TIẾT RESPONDER FORM */}
           {selectedResponder && (
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-               <div className="bg-white max-w-sm w-full rounded-[2rem] p-6 shadow-2xl relative animate-in zoom-in-95 duration-300">
+             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="bg-white max-w-sm w-full rounded-[2rem] p-6 shadow-2xl relative animate-in zoom-in-95 duration-300 max-h-[95vh] overflow-y-auto hide-scrollbar">
                   <button onClick={() => setSelectedResponder(null)} className="absolute top-4 right-4 w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-rose-100 hover:text-rose-600 transition-colors">✕</button>
                   <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mb-4 shadow-inner">
                     📋
@@ -543,16 +543,21 @@ const HospitalDashboard = () => {
                      return (
                         <div className="space-y-4">
                            {etaInfo && (
-                              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-2xl flex items-center justify-between shadow-lg shadow-blue-500/30">
-                                 <div>
-                                     <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-1">Đang Di Chuyển</p>
-                                     <p className="text-xl font-black">{etaInfo.time} <span className="text-sm font-medium">phút</span></p>
+                              <>
+                                 <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-2xl flex items-center justify-between shadow-lg shadow-blue-500/30">
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-1">Đang Di Chuyển</p>
+                                        <p className="text-xl font-black">{etaInfo.time} <span className="text-sm font-medium">phút</span></p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-1">Khoảng Cách</p>
+                                        <p className="text-lg font-bold">{etaInfo.km} <span className="text-xs font-medium">KM</span></p>
+                                    </div>
                                  </div>
-                                 <div className="text-right">
-                                     <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-1">Khoảng Cách</p>
-                                     <p className="text-lg font-bold">{etaInfo.km} <span className="text-xs font-medium">KM</span></p>
+                                 <div className="w-full h-32 rounded-2xl overflow-hidden border border-slate-200 shadow-inner relative isolate pointer-events-none">
+                                    <iframe width="100%" height="100%" frameBorder="0" style={{ border: 0, filter: 'contrast(1.2)' }} src={`https://maps.google.com/maps?q=${selectedResponder.helperLat},${selectedResponder.helperLng}&z=15&output=embed`} />
                                  </div>
-                              </div>
+                              </>
                            )}
                            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Người Xuất Phát Đi</p>
@@ -575,7 +580,21 @@ const HospitalDashboard = () => {
                   
                   <div className="flex gap-2 mt-6">
                      <button onClick={() => {
-                        setSelectedDonor({ id: selectedResponder.userId, name: selectedResponder.name, phone: selectedResponder.phone, bloodType: selectedResponder.bloodType });
+                        let distance = null, etaTime = null;
+                        if (selectedResponder.helperLat && selectedResponder.helperLng && hospitalUser?.lat && hospitalUser?.lng) {
+                           const r = 6371; const p = Math.PI / 180;
+                           const a = 0.5 - Math.cos((selectedResponder.helperLat - hospitalUser.lat) * p)/2 + 
+                                     Math.cos(hospitalUser.lat * p) * Math.cos(selectedResponder.helperLat * p) * 
+                                     (1 - Math.cos((selectedResponder.helperLng - hospitalUser.lng) * p))/2;
+                           distance = (2 * r * Math.asin(Math.sqrt(a))).toFixed(1);
+                           etaTime = Math.ceil(distance * 2);
+                        }
+                        setSelectedDonor({ 
+                           id: selectedResponder.userId, name: selectedResponder.name, 
+                           phone: selectedResponder.phone, bloodType: selectedResponder.bloodType,
+                           distance, etaTime,
+                           location: (selectedResponder.helperLat && selectedResponder.helperLng) ? { lat: selectedResponder.helperLat, lng: selectedResponder.helperLng } : null
+                        });
                         setSelectedResponder(null);
                      }} className="flex-1 bg-blue-100 text-blue-700 font-black py-4 rounded-xl shadow-sm hover:bg-blue-200 uppercase tracking-widest text-xs active:scale-95 transition-all text-center">
                         💬 NHẮN TIN
@@ -753,8 +772,14 @@ const HospitalDashboard = () => {
                 </div>
                 <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Khoảng cách</span>
-                  <span className="font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-md">{selectedDonor.distance} KM</span>
+                  <span className="font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-md">{selectedDonor.distance ? `${selectedDonor.distance} KM` : 'Đang tính...'}</span>
                 </div>
+                {selectedDonor.etaTime && (
+                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Di chuyển</span>
+                  <span className="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md">{selectedDonor.etaTime} phút</span>
+                </div>
+                )}
                 <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Lịch sử hiến</span>
                   <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">{selectedDonor.donationCount || 0} lần</span>

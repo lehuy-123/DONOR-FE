@@ -406,12 +406,43 @@ const DonorView = () => {
 
               {isEditing ? (
                 <form onSubmit={handleUpdateInfo} className="bg-white/10 backdrop-blur-md rounded-xl p-4 mt-4 space-y-3 border border-white/20">
-                  <input type="text" className="w-full bg-white/20 border border-white/30 p-2.5 rounded-lg text-sm text-white placeholder-white/60 font-bold focus:outline-none focus:ring-2 focus:ring-white" placeholder="Họ Tên" defaultValue={user.name} onChange={e => setEditData({ ...editData, name: e.target.value })} />
-                  <input type="text" className="w-full bg-white/20 border border-white/30 p-2.5 rounded-lg text-sm text-white placeholder-white/60 font-bold focus:outline-none focus:ring-2 focus:ring-white" placeholder="SĐT" defaultValue={user.phone} onChange={e => setEditData({ ...editData, phone: e.target.value })} />
-                  <select className="w-full bg-rose-600 border border-white/30 p-2.5 rounded-lg text-sm font-bold text-white focus:outline-none" defaultValue={user.bloodType} onChange={e => setEditData({ ...editData, bloodType: e.target.value })}>
-                    <option value="O+">O (+)</option><option value="O-">O (-)</option>
-                    <option value="A+">A (+)</option><option value="AB+">AB (+)</option>
-                  </select>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[9px] font-black uppercase text-white/70 tracking-widest px-1 block mb-1">Họ Tên</label>
+                      <input type="text" className="w-full bg-white/20 border border-white/30 p-2.5 rounded-lg text-sm text-white font-bold focus:outline-none focus:ring-2 focus:ring-white" defaultValue={user.name} onChange={e => setEditData({ ...editData, name: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black uppercase text-white/70 tracking-widest px-1 block mb-1">Điện thoại</label>
+                      <input type="text" className="w-full bg-white/20 border border-white/30 p-2.5 rounded-lg text-sm text-white font-bold focus:outline-none focus:ring-2 focus:ring-white" defaultValue={user.phone} onChange={e => setEditData({ ...editData, phone: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-[9px] font-black uppercase text-white/70 tracking-widest px-1 block mb-1">Tuổi</label>
+                      <input type="number" className="w-full bg-white/20 border border-white/30 p-2.5 rounded-lg text-sm text-white font-bold focus:outline-none focus:ring-2 focus:ring-white" defaultValue={user.age} onChange={e => setEditData({ ...editData, age: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black uppercase text-white/70 tracking-widest px-1 block mb-1">Cân nặng(kg)</label>
+                      <input type="number" className="w-full bg-white/20 border border-white/30 p-2.5 rounded-lg text-sm text-white font-bold focus:outline-none focus:ring-2 focus:ring-white" defaultValue={user.weight} onChange={e => setEditData({ ...editData, weight: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black uppercase text-white/70 tracking-widest px-1 block mb-1">Cao(cm)</label>
+                      <input type="number" className="w-full bg-white/20 border border-white/30 p-2.5 rounded-lg text-sm text-white font-bold focus:outline-none focus:ring-2 focus:ring-white" defaultValue={user.height} onChange={e => setEditData({ ...editData, height: e.target.value })} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-black uppercase text-white/70 tracking-widest px-1 block mb-1">Hiến máu lần cuối</label>
+                    <input type="date" className="w-full bg-white/20 border border-white/30 p-2.5 rounded-lg text-sm text-white font-bold focus:outline-none focus:ring-2 focus:ring-white" defaultValue={user.lastDonationDate} onChange={e => setEditData({ ...editData, lastDonationDate: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-black uppercase text-white/70 tracking-widest px-1 block mb-1">Nhóm Máu Thực Tế</label>
+                    <select className="w-full bg-rose-600 border border-white/30 p-2.5 rounded-lg text-sm font-bold text-white focus:outline-none" defaultValue={user.bloodType} onChange={e => setEditData({ ...editData, bloodType: e.target.value })}>
+                      <option value="O+">O (+)</option><option value="O-">O (-)</option>
+                      <option value="A+">A (+)</option><option value="AB+">AB (+)</option>
+                      <option value="B+">B (+)</option><option value="B-">B (-)</option>
+                      <option value="Không Rõ">Không Rõ</option>
+                    </select>
+                  </div>
                   <div className="flex gap-2 pt-2">
                     <button disabled={loading} type="submit" className="bg-white text-rose-700 py-2 rounded-lg flex-1 font-black shadow-md text-xs uppercase tracking-wider">Lưu</button>
                     <button type="button" onClick={() => setIsEditing(false)} className="bg-black/20 text-white py-2 rounded-lg font-bold px-4 text-xs">Hủy</button>
@@ -427,8 +458,16 @@ const DonorView = () => {
                       <p className="text-sm font-medium">{user.phone}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-white/60 uppercase font-black">Email</p>
-                      <p className="text-sm font-medium truncate">{user.email}</p>
+                      <p className="text-[10px] text-white/60 uppercase font-black">Tuổi / Cân nặng</p>
+                      <p className="text-sm font-medium uppercase">{user.age ? `${user.age}t` : '-'} / {user.weight ? `${user.weight}kg` : '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/60 uppercase font-black">Chiều cao</p>
+                      <p className="text-sm font-medium uppercase">{user.height ? `${user.height}cm` : '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/60 uppercase font-black">Hiến gần nhất</p>
+                      <p className="text-sm font-medium uppercase">{user.lastDonationDate ? new Date(user.lastDonationDate).toLocaleDateString('vi-VN') : 'Chưa có'}</p>
                     </div>
                   </div>
                 </div>
@@ -498,20 +537,44 @@ const DonorView = () => {
         <div className="lg:col-span-8 flex flex-col gap-6">
 
           {/* STATS TIẾN TRÌNH */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-center">
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Tổng Lượt Hiến</p>
-              <p className="text-3xl font-black text-rose-600">{user.donationCount || 0} <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Lần</span></p>
-            </div>
-            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-center sm:col-span-2 relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-full w-32 bg-gradient-to-l from-emerald-50 to-transparent"></div>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Sinh Mạng Đã Cứu Sống</p>
-              <div className="flex items-end justify-between mb-2">
-                <p className="text-sm font-bold text-slate-700">Dự kiến khoảng <span className="text-emerald-500 font-black text-xl mx-1">{(user.donationCount || 0) * 3}</span> bệnh nhân đã qua cơn nguy kịch</p>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
+              <div>
+                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Tổng Lượt Hiến Thống Kê</p>
+                 <div className="flex items-center gap-3">
+                    <div className="flex items-end gap-1">
+                      <input 
+                        type="number" 
+                        value={user.donationCount || 0} 
+                        onChange={(e) => {
+                           const val = parseInt(e.target.value) || 0;
+                           setUser(prev => ({ ...prev, donationCount: val }));
+                        }}
+                        className="text-4xl font-black text-rose-600 w-24 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 outline-none text-center focus:ring-2 focus:ring-rose-400 transition-all" 
+                      />
+                      <span className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-2">Lần</span>
+                    </div>
+                    <button 
+                      onClick={async () => {
+                         try {
+                           const val = user.donationCount || 0;
+                           await fetch('https://donor-be.onrender.com/api/users/sync', {
+                              method: 'POST', headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ ...user, donationCount: val, mockId: user.id || user._id })
+                           });
+                           localStorage.setItem('me_donor', JSON.stringify({ ...user, donationCount: val }));
+                           alert('Đã cập nhật số lần hiến máu!');
+                         } catch (err) {
+                           alert('Lỗi khi cập nhật!');
+                         }
+                      }}
+                      className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-black px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all shadow-md"
+                    >
+                      Lưu Lại
+                    </button>
+                 </div>
               </div>
-              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div className="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full rounded-full transition-all duration-1000" style={{ width: `${Math.min(((user.donationCount || 0) * 3) * 5, 100)}%` }}></div>
-              </div>
+              <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center shadow-inner text-rose-500 text-3xl">🩸</div>
             </div>
           </div>
 
