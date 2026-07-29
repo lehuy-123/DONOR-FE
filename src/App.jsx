@@ -5,9 +5,21 @@ import HospitalDashboard from './views/HospitalDashboard';
 
 function App() {
   return (
-    <div className="min-h-screen bg-rose-50/30 flex flex-col font-sans text-slate-800 selection:bg-rose-200 selection:text-rose-900">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 selection:bg-rose-200 selection:text-rose-900 relative">
+      
+      {/* THAY ĐỔI BACKGROUND SANG DẠNG LƯỚI TẾ BÀO (HEXAGON) VÀ ÁNH SÁNG MỀM */}
+      <div className="fixed inset-0 pointer-events-none z-0 bg-slate-100/50"></div>
+      
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-100 filter contrast-125 saturate-150" 
+           style={{ backgroundImage: `url('https://www.transparenttextures.com/patterns/hexellence.png')` }}>
+      </div>
+      
+      {/* Hiệu ứng ánh sáng nền mềm mại (Soft Mesh Gradient) */}
+      <div className="fixed top-[-20%] left-[-10%] w-[70%] h-[70%] bg-gradient-to-br from-rose-100/50 to-transparent rounded-full mix-blend-multiply filter blur-[100px] pointer-events-none z-0"></div>
+      <div className="fixed bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-gradient-to-tl from-indigo-100/50 to-transparent rounded-full mix-blend-multiply filter blur-[100px] pointer-events-none z-0"></div>
+
       {/* Navbar with Glassmorphism */}
-      <nav className="bg-white/70 backdrop-blur-lg sticky top-0 z-50 border-b border-rose-100 shadow-sm">
+      <nav className="bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-rose-100/50 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-3">
@@ -32,11 +44,6 @@ function App() {
       </nav>
 
       <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-10 relative">
-        {/* Background decorative blobs */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-rose-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob pointer-events-none"></div>
-        <div className="absolute top-0 right-10 w-72 h-72 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000 pointer-events-none"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000 pointer-events-none"></div>
-
         <div className="relative z-10 w-full">
           <Routes>
             <Route path="/" element={<DonorView />} />

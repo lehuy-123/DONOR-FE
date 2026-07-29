@@ -765,28 +765,28 @@ const DonorView = () => {
 
           {/* MESSAGE ROOM CHUYÊN NGHIỆP */}
           <div id="chat-room-section" className="bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col flex-1 min-h-[450px]">
-            <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 text-xl shadow-inner">🏥</div>
-                <div>
-                  <select value={selectedHospitalId} onChange={e => setSelectedHospitalId(e.target.value)} className="font-black text-slate-800 text-lg bg-transparent outline-none cursor-pointer hover:text-blue-600 transition-colors">
-                    <option value="choray">Phòng Trực Ban: Bệnh Viện Chợ Rẫy</option>
-                    <option value="nd115">Phòng Trực Ban: Nhân Dân 115</option>
+            <div className="px-4 sm:px-8 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 text-lg sm:text-xl shadow-inner shrink-0">🏥</div>
+                <div className="flex-1 min-w-0">
+                  <select value={selectedHospitalId} onChange={e => setSelectedHospitalId(e.target.value)} className="w-full font-black text-slate-800 text-sm sm:text-lg bg-transparent outline-none cursor-pointer hover:text-blue-600 transition-colors truncate">
+                    <option value="choray">Phòng Trực Ban: Chợ Rẫy</option>
+                    <option value="nd115">Phòng Trực Ban: N.Dân 115</option>
                     <option value="giadinh">Phòng Trực Ban: Nhân Dân Gia Định</option>
                   </select>
-                  <p className="text-[10px] uppercase font-bold text-emerald-500 tracking-widest flex items-center gap-1.5 mt-0.5">
+                  <p className="text-[9px] sm:text-[10px] uppercase font-bold text-emerald-500 tracking-widest flex items-center gap-1.5 mt-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> KÊNH TRUYỀN DỮ LIỆU ĐỘC LẬP
                   </p>
                 </div>
               </div>
+              
               <button onClick={async () => {
                 await fetch(`https://donor-be.onrender.com/api/users/${user?.id || user?._id}/chats`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ text: "🟢 TÔI KHỎE MẠNH! ĐÃ NHẬN TIẾP ĐƯỜNG VÀ SẴN SÀNG DI CHUYỂN NGAY LẬP TỨC.", sender: 'donor', hospitalId: selectedHospitalId })
                 });
                 alert("Đã gửi Báo Cáo Thể Trạng!");
-              }} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-md active:scale-95 flex items-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700`}>
+              }} className="w-full sm:w-auto px-4 py-3 sm:py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700">
                 ⚡ BÁO CÁO THỂ TRẠNG
               </button>
             </div>
@@ -812,7 +812,7 @@ const DonorView = () => {
               )}
             </div>
 
-            <div className="p-4 bg-white border-t border-slate-100 rounded-b-[2rem]">
+            <div className="p-4 sm:p-5 bg-white border-t border-slate-100 rounded-b-[2rem]">
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 if (!chatMessage.trim() || !user) return;
@@ -823,7 +823,7 @@ const DonorView = () => {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ text, sender: 'donor', hospitalId: selectedHospitalId })
                 });
-              }} className="flex gap-3 bg-slate-50 border border-slate-200 p-1.5 rounded-2xl relative shadow-inner">
+              }} className="flex gap-2 sm:gap-3 bg-slate-50 border border-slate-200 p-1.5 rounded-2xl relative shadow-inner">
                 <button type="button" onClick={() => fileInputRef.current?.click()} className="bg-slate-200 hover:bg-slate-300 text-slate-600 w-12 flex items-center justify-center rounded-xl transition-all shadow-inner active:scale-95 text-xl cursor-pointer">
                   📷
                 </button>

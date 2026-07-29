@@ -566,7 +566,7 @@ const HospitalDashboard = () => {
                 <input type="text" value={broadcastMsg} onChange={e => setBroadcastMsg(e.target.value)} placeholder="Nhập tóm tắt tình trạng khẩn cấp..." className="w-2/3 bg-white/20 border border-white/30 p-3 rounded-xl text-white placeholder-white/60 font-medium text-sm focus:outline-none focus:bg-white/30 transition-all" />
               </div>
               <button onClick={handleBroadcast} className="w-full bg-white text-rose-600 hover:bg-rose-50 font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-xs transition-all active:scale-95 flex justify-center items-center gap-2">
-                <span className="text-xl">📡</span> BẮN TÍN HIỆU CẦU CỨU
+                <span className="text-xl"></span> SOS
               </button>
             </div>
 
@@ -630,7 +630,7 @@ const HospitalDashboard = () => {
                           </div>
                         </>
                       )}
-                      
+
                       <div className="flex gap-3">
                         <div className="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-100">
                           <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Người Đi</p>
