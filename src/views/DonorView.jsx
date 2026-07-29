@@ -35,6 +35,12 @@ const DonorView = () => {
   const [now, setNow] = useState(Date.now());
   const [activeMission, setActiveMission] = useState(null);
 
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [aiHistory, setAiHistory] = useState([
+    { role: 'ai', text: 'Chào bạn, tôi là trợ lý AI ảo của Trạm Miễn Dịch. Bạn cần ghi nhận lịch trình, hay tìm hiểu chế độ dinh dưỡng hiến máu hôm nay?' }
+  ]);
+  const [aiInput, setAiInput] = useState('');
+
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 15000); // Cập nhật mảng mỗi 15s để làm timer xóa 3 phút
     return () => clearInterval(interval);
@@ -887,6 +893,60 @@ const DonorView = () => {
           </div>
         </div>
       </div>
+
+      {/* FLOATING AI CHAT BUTTON */}
+      <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end">
+        {/* Render Chatbox Window */}
+        {showAIChat && (
+          <div className="bg-white w-80 sm:w-96 h-[32rem] rounded-3xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden mb-4 animate-in slide-in-from-bottom-8 duration-300">
+            <div className="bg-gradient-to-r from-rose-600 to-red-600 p-4 text-white flex justify-between items-center shadow-md z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-xl shadow-inner border border-white/30">🩺</div>
+                <div>
+                  <h3 className="font-black text-sm tracking-widest uppercase mb-0.5">Trợ lý Y Tế AI</h3>
+                  <p className="text-[9px] font-bold text-rose-200 uppercase tracking-widest">Luôn sẵn sàng hỗ trợ 24/7</p>
+                </div>
+              </div>
+              <button onClick={() => setShowAIChat(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 hover:scale-110 active:scale-95 transition-all font-black text-sm">✕</button>
+            </div>
+            
+            <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50 relative custom-scrollbar flex flex-col" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }}>
+              {aiHistory.map((msg, idx) => (
+                <div key={idx} className={`w-full flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] rounded-2xl px-5 py-3 text-[13px] font-medium leading-relaxed shadow-sm ${msg.role === 'user' ? 'bg-gradient-to-br from-rose-500 to-red-600 text-white rounded-br-sm shadow-rose-200' : 'bg-white border border-slate-200 text-slate-700 rounded-bl-sm shadow-slate-200/50'}`}>
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if(!aiInput.trim()) return;
+              setAiHistory([...aiHistory, { role: 'user', text: aiInput }]);
+              setAiInput('');
+              
+              // Mock AI Response
+              setTimeout(() => {
+                setAiHistory(prev => [...prev, { role: 'ai', text: 'Cảm ơn ghi nhận của bạn. Tôi đang được nâng cấp để kết nối với cơ sở dữ liệu bệnh viện!' }]);
+              }, 600);
+            }} className="p-3 bg-white border-t border-slate-100 flex gap-2">
+              <input type="text" value={aiInput} onChange={e => setAiInput(e.target.value)} placeholder="Hỏi trợ lý Y tế..." className="flex-1 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl outline-none focus:ring-2 focus:ring-rose-400 text-[13px] font-medium transition-all shadow-inner" />
+              <button type="submit" className="bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white w-11 h-11 rounded-xl flex items-center justify-center shadow-md active:scale-95 transition-all text-sm font-black tracking-tighter">GỬI</button>
+            </form>
+          </div>
+        )}
+
+        {/* The Toggle Button */}
+        <button onClick={() => setShowAIChat(!showAIChat)} className={`w-14 h-14 rounded-full bg-gradient-to-tr from-rose-600 to-red-600 text-white font-black text-2xl shadow-xl shadow-rose-500/40 hover:-translate-y-1 hover:shadow-rose-500/50 active:scale-95 transition-all flex items-center justify-center relative ${showAIChat ? 'rotate-90' : 'rotate-0'}`}>
+          {showAIChat ? '✕' : '💬'}
+          {!showAIChat && <span className="absolute -top-1 -right-1 flex h-4 w-4">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-4 w-4 bg-rose-500 border-2 border-white"></span>
+          </span>}
+        </button>
+      </div>
+
     </div>
   );
 };
