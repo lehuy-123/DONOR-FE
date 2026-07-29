@@ -768,7 +768,7 @@ const DonorView = () => {
           <div id="chat-room-section" className="bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col flex-1 min-h-[450px]">
             <div className="px-4 sm:px-8 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 text-lg sm:text-xl shadow-inner shrink-0">🏥</div>
+                <img src="/hospital_avatar.png" alt="Phòng Trực Ban" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border border-slate-200 shadow-sm shrink-0" />
                 <div className="flex-1 min-w-0">
                   <select value={selectedHospitalId} onChange={e => setSelectedHospitalId(e.target.value)} className="w-full font-black text-slate-800 text-sm sm:text-lg bg-transparent outline-none cursor-pointer hover:text-blue-600 transition-colors truncate">
                     <option value="choray">Phòng Trực Ban: Chợ Rẫy</option>
@@ -792,7 +792,7 @@ const DonorView = () => {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8 space-y-6 flex flex-col bg-slate-50/30">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 flex flex-col relative" style={{ backgroundColor: '#f8fafc', backgroundImage: "url('https://www.transparenttextures.com/patterns/diagmonds-light.png')" }}>
               {messages.filter(m => m.hospitalId === selectedHospitalId).length === 0 ? (
                 <div className="m-auto flex flex-col items-center justify-center text-center max-w-sm opacity-50">
                   <span className="text-4xl mb-4 grayscale">💬</span>

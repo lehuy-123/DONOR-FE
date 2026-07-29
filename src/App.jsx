@@ -5,18 +5,18 @@ import HospitalDashboard from './views/HospitalDashboard';
 
 function App() {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 selection:bg-rose-200 selection:text-rose-900 relative">
+    <div className="min-h-screen bg-rose-50 flex flex-col font-sans text-slate-800 selection:bg-rose-200 selection:text-rose-900 relative">
       
       {/* THAY ĐỔI BACKGROUND SANG DẠNG LƯỚI TẾ BÀO (HEXAGON) VÀ ÁNH SÁNG MỀM */}
-      <div className="fixed inset-0 pointer-events-none z-0 bg-slate-100/50"></div>
+      <div className="fixed inset-0 pointer-events-none z-0 bg-rose-50/80"></div>
       
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-100 filter contrast-125 saturate-150" 
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.85] filter contrast-125 saturate-[1.2]" 
            style={{ backgroundImage: `url('https://www.transparenttextures.com/patterns/hexellence.png')` }}>
       </div>
       
       {/* Hiệu ứng ánh sáng nền mềm mại (Soft Mesh Gradient) */}
-      <div className="fixed top-[-20%] left-[-10%] w-[70%] h-[70%] bg-gradient-to-br from-rose-100/50 to-transparent rounded-full mix-blend-multiply filter blur-[100px] pointer-events-none z-0"></div>
-      <div className="fixed bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-gradient-to-tl from-indigo-100/50 to-transparent rounded-full mix-blend-multiply filter blur-[100px] pointer-events-none z-0"></div>
+      <div className="fixed top-[-20%] left-[-10%] w-[70%] h-[70%] bg-gradient-to-br from-rose-200/60 to-transparent rounded-full mix-blend-multiply filter blur-[100px] pointer-events-none z-0"></div>
+      <div className="fixed bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-gradient-to-tl from-rose-200/40 to-transparent rounded-full mix-blend-multiply filter blur-[100px] pointer-events-none z-0"></div>
 
       {/* Navbar with Glassmorphism */}
       <nav className="bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-rose-100/50 shadow-sm">
