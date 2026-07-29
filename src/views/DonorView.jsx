@@ -20,7 +20,6 @@ const DonorView = () => {
 
   const [chatMessage, setChatMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [inVideoCall, setInVideoCall] = useState(false);
   const [selectedHospitalId, setSelectedHospitalId] = useState('choray');
   const fileInputRef = useRef(null);
   const previousMessagesLength = useRef(0);
@@ -215,9 +214,6 @@ const DonorView = () => {
     );
   }
 
-  const nextTierNeeded = user?.donationCount < 3 ? 3 - user?.donationCount : (user?.donationCount < 10 ? 10 - user?.donationCount : 0);
-  const tierName = user?.donationCount < 3 ? 'Đồng' : (user?.donationCount < 10 ? 'Bạc' : 'Vàng');
-
   return (
     <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 pb-20 relative">
       
@@ -301,7 +297,7 @@ const DonorView = () => {
               ) : (
                 <div className="space-y-1">
                   <h2 className="text-2xl font-black tracking-tight">{user.name}</h2>
-                  <p className="text-xs font-bold text-white/80 tracking-widest uppercase">Thành viên Hạng {tierName}</p>
+                  <p className="text-xs font-bold text-white/80 tracking-widest uppercase">Thành viên Danh dự</p>
                   <div className="pt-4 grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-[10px] text-white/60 uppercase font-black">Điện thoại</p>
@@ -385,13 +381,13 @@ const DonorView = () => {
               <p className="text-3xl font-black text-rose-600">{user.donationCount || 0} <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Lần</span></p>
             </div>
             <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-center sm:col-span-2 relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-full w-32 bg-gradient-to-l from-amber-50 to-transparent"></div>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Tiến trình Thăng Hạng</p>
+              <div className="absolute top-0 right-0 h-full w-32 bg-gradient-to-l from-emerald-50 to-transparent"></div>
+              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Sinh Mạng Đã Cứu Sống</p>
               <div className="flex items-end justify-between mb-2">
-                <p className="text-sm font-bold text-slate-700">Cần {nextTierNeeded} lần nữa để lên hạng <span className="text-amber-500 font-black uppercase">{tierName === 'Đồng' ? 'Bạc' : 'Vàng'}</span></p>
+                <p className="text-sm font-bold text-slate-700">Dự kiến khoảng <span className="text-emerald-500 font-black text-xl mx-1">{(user.donationCount || 0) * 3}</span> bệnh nhân đã qua cơn nguy kịch</p>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div className="bg-gradient-to-r from-amber-400 to-amber-500 h-full rounded-full transition-all duration-1000" style={{ width: `${((user.donationCount || 0) / (user.donationCount + nextTierNeeded)) * 100}%` }}></div>
+                <div className="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full rounded-full transition-all duration-1000" style={{ width: `${Math.min(((user.donationCount || 0) * 3) * 5, 100)}%` }}></div>
               </div>
             </div>
           </div>
@@ -402,7 +398,7 @@ const DonorView = () => {
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 text-xl shadow-inner">🏥</div>
                 <div>
-                  <select value={selectedHospitalId} onChange={e => { setSelectedHospitalId(e.target.value); setInVideoCall(false); }} className="font-black text-slate-800 text-lg bg-transparent outline-none cursor-pointer hover:text-blue-600 transition-colors">
+                  <select value={selectedHospitalId} onChange={e => setSelectedHospitalId(e.target.value)} className="font-black text-slate-800 text-lg bg-transparent outline-none cursor-pointer hover:text-blue-600 transition-colors">
                     <option value="choray">Phòng Trực Ban: Bệnh Viện Chợ Rẫy</option>
                     <option value="nd115">Phòng Trực Ban: Nhân Dân 115</option>
                     <option value="giadinh">Phòng Trực Ban: Nhân Dân Gia Định</option>
@@ -412,22 +408,20 @@ const DonorView = () => {
                   </p>
                 </div>
               </div>
-              <button onClick={() => setInVideoCall(!inVideoCall)} className={`px-4 py-2 rounded-xl text-xs font-black uppercase transition-all shadow-md active:scale-95 flex items-center gap-2 ${inVideoCall ? 'bg-rose-500 text-white' : 'bg-slate-800 text-white hover:bg-black'}`}>
-                {inVideoCall ? 'ĐÓNG KẾT NỐI CAMERA' : '📞 GỌI VIDEO KHẨN CẤP'}
+              <button onClick={async () => {
+                 await fetch(`https://donor-be.onrender.com/api/users/${user.id}/chats`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: "🟢 TÔI KHỎE MẠNH! ĐÃ NHẬN TIẾP ĐƯỜNG VÀ SẴN SÀNG DI CHUYỂN NGAY LẬP TỨC.", sender: 'donor', hospitalId: selectedHospitalId })
+                 });
+                 alert("Đã gửi Báo Cáo Thể Trạng!");
+              }} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-md active:scale-95 flex items-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700`}>
+                ⚡ BÁO CÁO THỂ TRẠNG
               </button>
             </div>
 
-            {inVideoCall ? (
-              <div className="flex-1 bg-slate-900 overflow-hidden relative">
-                <iframe
-                  allow="camera; microphone; fullscreen; display-capture; autoplay"
-                  src={`https://meet.jit.si/bloodconnect_${user.id}_${selectedHospitalId}`}
-                  style={{ height: '100%', width: '100%', border: 0 }}
-                ></iframe>
-              </div>
-            ) : (
-              <div className="flex-1 overflow-y-auto p-8 space-y-6 flex flex-col bg-slate-50/30">
-                {messages.filter(m => m.hospitalId === selectedHospitalId).length === 0 ? (
+            <div className="flex-1 overflow-y-auto p-8 space-y-6 flex flex-col bg-slate-50/30">
+              {messages.filter(m => m.hospitalId === selectedHospitalId).length === 0 ? (
                   <div className="m-auto flex flex-col items-center justify-center text-center max-w-sm opacity-50">
                     <span className="text-4xl mb-4 grayscale">💬</span>
                     <span className="text-sm font-bold text-slate-500">Kênh mã khóa End-to-End đã thành lập</span>
@@ -446,7 +440,6 @@ const DonorView = () => {
                   ))
                 )}
               </div>
-            )}
 
             <div className="p-4 bg-white border-t border-slate-100 rounded-b-[2rem]">
               <form onSubmit={handleSendReply} className="flex gap-3 bg-slate-50 border border-slate-200 p-1.5 rounded-2xl relative shadow-inner">

@@ -630,23 +630,26 @@ const HospitalDashboard = () => {
                     <p className="text-[10px] uppercase font-bold text-emerald-500 tracking-widest">Giao thức bảo mật với {hospitalUser.name}</p>
                   </div>
                 </div>
-                <button onClick={() => setInVideoCall(!inVideoCall)} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-md active:scale-95 flex items-center gap-2 ${inVideoCall ? 'bg-rose-500 text-white' : 'bg-slate-800 text-white hover:bg-black'}`}>
-                   {inVideoCall ? 'ĐÓNG KẾT NỐI' : '📞 GỌI KHẨN CẤP'}
+                <button 
+                  onClick={async () => {
+                     await fetch(`https://donor-be.onrender.com/api/users/${selectedDonor.id}/chats`, {
+                         method: 'POST',
+                         headers: { 'Content-Type': 'application/json' },
+                         body: JSON.stringify({ 
+                             text: `📍 ĐỘI CẤP CỨU ĐÃ MỞ ĐƯỜNG ƯU TIÊN. Chạy theo định vị sau: https://maps.google.com/?q=${hospitalUser.lat},${hospitalUser.lng}`, 
+                             sender: hospitalUser.name, 
+                             hospitalId: hospitalUser.id 
+                         })
+                     });
+                  }}
+                  className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-md active:scale-95 flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700`}>
+                   📍 GỬI TỌA ĐỘ BỆNH VIỆN
                 </button>
               </div>
 
               {/* Chat box */}
-              {inVideoCall ? (
-                 <div className="flex-1 bg-slate-900 overflow-hidden relative">
-                     <iframe 
-                        allow="camera; microphone; fullscreen; display-capture; autoplay"
-                        src={`https://meet.jit.si/bloodconnect_${selectedDonor.id}_${hospitalUser.id}`}
-                        style={{ height: '100%', width: '100%', border: 0 }}
-                     ></iframe>
-                  </div>
-              ) : (
-                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
-                  <div className="w-full text-center text-xs text-slate-400 font-medium mb-8">Cuộc hội thoại được mã hóa</div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
+                <div className="w-full text-center text-xs text-slate-400 font-medium mb-8">Cuộc hội thoại được mã hóa</div>
 
                   {messages.filter(m => m.hospitalId === hospitalUser.id).length === 0 ? (
                     <div className="text-sm font-medium text-slate-400 text-center py-10">Chưa có tin nhắn nào. Bắt đầu phiên liên lạc 2 chiều ngay!</div>
@@ -663,7 +666,6 @@ const HospitalDashboard = () => {
                     ))
                   )}
                 </div>
-              )}
 
               {/* Chat Input */}
               <div className="p-4 border-t border-slate-100 bg-white">
