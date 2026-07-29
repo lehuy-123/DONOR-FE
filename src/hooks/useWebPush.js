@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { updateDonorProfile } from '../utils/firestore';
 
+const API_BASE = import.meta.env.VITE_API_URL || "https://donor-be.onrender.com";
 export const useWebPush = () => {
   const [fcmToken, setFcmToken] = useState(null);
   const [permission, setPermission] = useState('default');
@@ -14,7 +15,7 @@ export const useWebPush = () => {
       }
 
       // Đăng ký Service Worker & lấy VAPID key
-      const res = await fetch('http://localhost:5000/api/vapid-key');
+      const res = await fetch(`${API_BASE}/api/vapid-key`);
       const { publicKey } = await res.json();
 
       const registration = await navigator.serviceWorker.ready;

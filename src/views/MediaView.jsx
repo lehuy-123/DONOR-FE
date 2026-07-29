@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const API_BASE = import.meta.env.VITE_API_URL || "https://donor-be.onrender.com";
+
 const mockArticles = [
   {
     id: 1,
@@ -93,7 +95,7 @@ const MediaView = () => {
     if (savedMe) setUser(JSON.parse(savedMe));
 
     // Fetch danh sách lịch hẹn sắp diễn ra từ backend
-    fetch(`http://localhost:5000/api/broadcasts`)
+    fetch(`${API_BASE}/api/broadcasts`)
       .then(res => res.json())
       .then(data => {
         if (data.broadcasts) {
@@ -259,7 +261,7 @@ const MediaView = () => {
                                 respondedAt: new Date().toISOString()
                               };
                               try {
-                                await fetch(`http://localhost:5000/api/broadcasts/${b.id}/respond`, {
+                                await fetch(`${API_BASE}/api/broadcasts/${b.id}/respond`, {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify(payload)

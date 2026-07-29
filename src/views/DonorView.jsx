@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+
+const API_BASE = import.meta.env.VITE_API_URL || "https://donor-be.onrender.com";
 import { useWebPush } from '../hooks/useWebPush';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { loginOrRegisterDonor, updateDonorProfile } from '../utils/firestore';
 import { io } from "socket.io-client";
 
 // Khởi tạo Socket.io client kết nối tới Node.js Backend
-const socket = io("http://localhost:5000");
+const socket = io(`${API_BASE}`);
 
 const DonorView = () => {
   const { fcmToken, permission, requestPermissionAndGetToken } = useWebPush();
@@ -57,7 +59,7 @@ const DonorView = () => {
     if (!activeId) return;
 
     // Lấy lịch sử chat bằng REST API
-    fetch(`http://localhost:5000/api/users/${activeId}/chats`)
+    fetch(`${API_BASE}/api/users/${activeId}/chats`)
       .then(res => {
         if (res.status === 404 || res.status === 401) {
           localStorage.removeItem('me_donor');
@@ -74,7 +76,7 @@ const DonorView = () => {
       })
       .catch(e => console.error(e));
 
-    fetch(`http://localhost:5000/api/broadcasts`)
+    fetch(`${API_BASE}/api/broadcasts`)
       .then(res => res.json())
       .then(data => {
         if (data.broadcasts) setBroadcasts(data.broadcasts);
@@ -154,7 +156,7 @@ const DonorView = () => {
   useEffect(() => {
     const activeId = user?.id || user?._id;
     if (!activeId) return;
-    fetch(`http://localhost:5000/api/emergency-missions?userId=${activeId}`)
+    fetch(`${API_BASE}/api/emergency-missions?userId=${activeId}`)
       .then(res => res.json())
       .then(data => {
         if (data.missions && data.missions.length > 0) {
@@ -313,7 +315,7 @@ const DonorView = () => {
                         helperLng: location?.lng || user.location?.lng || (106.7009 + (Math.random() * 0.1 - 0.05)),
                         respondedAt: new Date().toISOString()
                       };
-                      await fetch(`http://localhost:5000/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                      await fetch(`${API_BASE}/api/broadcasts/${activeBroadcastForm.id}/respond`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                       });
@@ -332,7 +334,7 @@ const DonorView = () => {
                       helperName: supportForm.helperName, helperPhone: supportForm.helperPhone, helperBloodType: supportForm.helperBloodType,
                       respondedAt: new Date().toISOString()
                     };
-                    await fetch(`http://localhost:5000/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                    await fetch(`${API_BASE}/api/broadcasts/${activeBroadcastForm.id}/respond`, {
                       method: 'POST', headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify(payload)
                     });
@@ -387,7 +389,7 @@ const DonorView = () => {
               <button disabled={loading} onClick={async () => {
                 setLoading(true);
                 try {
-                  await fetch('http://localhost:5000/api/emergency-missions', {
+                  await fetch(`${API_BASE}/api/emergency-missions`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ hospitalId: emergencyAlert.hospitalId, hospitalName: emergencyAlert.sender, userId: user.id || user._id, user: { ...user, id: user.id || user._id }, status: 'ĐANG ĐẾN' })
                   });
@@ -399,7 +401,7 @@ const DonorView = () => {
               <button disabled={loading} onClick={async () => {
                 setLoading(true);
                 try {
-                  await fetch('http://localhost:5000/api/emergency-missions', {
+                  await fetch(`${API_BASE}/api/emergency-missions`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ hospitalId: emergencyAlert.hospitalId, hospitalName: emergencyAlert.sender, userId: user.id || user._id, user: { ...user, id: user.id || user._id }, status: 'CHẤP NHẬN' })
                   });
@@ -449,7 +451,7 @@ const DonorView = () => {
 
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               <button disabled={activeMission.status !== 'ĐANG ĐẾN' && activeMission.status !== 'CHẤP NHẬN'} onClick={async () => {
-                await fetch(`http://localhost:5000/api/emergency-missions/${activeMission.id}/status`, {
+                await fetch(`${API_BASE}/api/emergency-missions/${activeMission.id}/status`, {
                   method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'ĐÃ ĐẾN' })
                 });
               }} className={`px-6 py-4 sm:py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${activeMission.status === 'ĐANG ĐẾN' || activeMission.status === 'CHẤP NHẬN' ? 'bg-white text-rose-600 hover:bg-slate-100 shadow-lg active:scale-95' :
@@ -460,7 +462,7 @@ const DonorView = () => {
 
               <button disabled={activeMission.status !== 'ĐÃ ĐẾN'} onClick={async () => {
                 if (!window.confirm('Xác nhận bạn đã hoàn tất quy trình lấy máu tại Bệnh viện?')) return;
-                await fetch(`http://localhost:5000/api/emergency-missions/${activeMission.id}/status`, {
+                await fetch(`${API_BASE}/api/emergency-missions/${activeMission.id}/status`, {
                   method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'ĐÃ HIẾN MÁU' })
                 });
               }} className={`px-6 py-4 sm:py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${activeMission.status === 'ĐÃ ĐẾN' ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95' :
@@ -589,7 +591,7 @@ const DonorView = () => {
               </div>
 
               <button onClick={async () => {
-                await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
+                await fetch(`${API_BASE}/api/users/${user?.id || user?._id}/chats`, {
                   method: 'POST', headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ text: "🟢 TÔI KHỎE MẠNH! ĐÃ NHẬN TIẾP ĐƯỜNG VÀ SẴN SÀNG DI CHUYỂN NGAY LẬP TỨC.", sender: 'donor', hospitalId: selectedHospitalId })
                 });
@@ -626,7 +628,7 @@ const DonorView = () => {
                 if (!chatMessage.trim() || !user) return;
                 const text = chatMessage;
                 setChatMessage("");
-                await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
+                await fetch(`${API_BASE}/api/users/${user?.id || user?._id}/chats`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ text, sender: 'donor', hospitalId: selectedHospitalId })
@@ -640,7 +642,7 @@ const DonorView = () => {
                   if (!file) return;
                   const reader = new FileReader();
                   reader.onload = async (event) => {
-                    await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
+                    await fetch(`${API_BASE}/api/users/${user?.id || user?._id}/chats`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ text: "📷 Hình ảnh rà soát", sender: 'donor', hospitalId: selectedHospitalId, image: event.target.result })
@@ -681,7 +683,7 @@ const DonorView = () => {
                     onClick={async () => {
                       try {
                         const val = user.donationCount || 0;
-                        await fetch('http://localhost:5000/api/users/sync', {
+                        await fetch(`${API_BASE}/api/users/sync`, {
                           method: 'POST', headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ ...user, donationCount: val, mockId: user.id || user._id })
                         });
@@ -772,7 +774,7 @@ const DonorView = () => {
                                     supportType: 'Đăng ký Lịch hẹn',
                                     respondedAt: new Date().toISOString()
                                   };
-                                  await fetch(`http://localhost:5000/api/broadcasts/${b.id}/respond`, {
+                                  await fetch(`${API_BASE}/api/broadcasts/${b.id}/respond`, {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify(payload)
@@ -787,7 +789,7 @@ const DonorView = () => {
                             </button>
                             <button onClick={async () => {
                               const payload = { userId: user.id || user._id, status: 'Từ Chối', respondedAt: new Date().toISOString() };
-                              await fetch(`http://localhost:5000/api/broadcasts/${b.id}/respond`, {
+                              await fetch(`${API_BASE}/api/broadcasts/${b.id}/respond`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(payload)

@@ -4,7 +4,7 @@ import { generateMockData } from '../utils/firestore';
 import { io } from "socket.io-client";
 
 // Khởi tạo Socket.io client kết nối tới Node.js Backend
-const socket = io("http://localhost:5000");
+const socket = io(`${API_BASE}`);
 const HOSPITALS = [
   { id: 'choray', name: 'Bệnh Viện Chợ Rẫy', lat: 10.7583, lng: 106.6570, color: 'from-blue-700 to-blue-900', avatar: '/bvchoray.png', isLogo: true },
   { id: 'nd115', name: 'Nhân Dân 115', lat: 10.7758, lng: 106.6666, color: 'from-emerald-700 to-emerald-900', avatar: '/bv115.png', isLogo: true },
@@ -35,7 +35,7 @@ const HospitalDashboard = () => {
   const [selectedResponder, setSelectedResponder] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/broadcasts`)
+    fetch(`${API_BASE}/api/broadcasts`)
       .then(res => res.json())
       .then(data => data.broadcasts && setBroadcasts(data.broadcasts.filter(b => b.hospitalId === hospitalUser?.id)))
       .catch(e => console.error(e));
@@ -54,7 +54,7 @@ const HospitalDashboard = () => {
     if (!window.confirm(`Xác nhận phát bản tin tới TOÀN LÃNH THỔ cho nhóm máu: ${broadcastTarget}?`)) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/broadcasts`, {
+      const res = await fetch(`${API_BASE}/api/broadcasts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -158,7 +158,7 @@ const HospitalDashboard = () => {
   const fetchInbox = async () => {
     if (!hospitalUser) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/users`);
+      const res = await fetch(`${API_BASE}/api/users`);
       const data = await res.json();
       const usersWithChats = [];
       (data.users || []).forEach(userData => {
@@ -182,7 +182,7 @@ const HospitalDashboard = () => {
 
   useEffect(() => {
     if (!hospitalUser) return;
-    fetch(`http://localhost:5000/api/emergency-missions?hospitalId=${hospitalUser.id}`)
+    fetch(`${API_BASE}/api/emergency-missions?hospitalId=${hospitalUser.id}`)
       .then(res => res.json())
       .then(data => {
         if (data.missions) {
@@ -253,7 +253,7 @@ const HospitalDashboard = () => {
   // Nạp lịch sử từ Backend mỗi khi mở Profile Modal
   useEffect(() => {
     if (!selectedDonor) return;
-    fetch(`http://localhost:5000/api/users/${selectedDonor.id}/chats`)
+    fetch(`${API_BASE}/api/users/${selectedDonor.id}/chats`)
       .then(res => res.json())
       .then(data => setMessages(data.chats || []))
       .catch(e => console.error(e));
@@ -317,7 +317,7 @@ const HospitalDashboard = () => {
 
     const text = chatMessage;
     setChatMessage("");
-    await fetch(`http://localhost:5000/api/users/${selectedDonor.id}/chats`, {
+    await fetch(`${API_BASE}/api/users/${selectedDonor.id}/chats`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, sender: hospitalUser.name, hospitalId: hospitalUser.id })
@@ -329,7 +329,7 @@ const HospitalDashboard = () => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async (event) => {
-      await fetch(`http://localhost:5000/api/users/${selectedDonor.id}/chats`, {
+      await fetch(`${API_BASE}/api/users/${selectedDonor.id}/chats`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: "📷 Hình ảnh Y khoa đính kèm", sender: hospitalUser.name, hospitalId: hospitalUser.id, image: event.target.result })
@@ -346,7 +346,7 @@ const HospitalDashboard = () => {
     if (!window.confirm(`Phát lệnh báo động khẩn cấp tới thiết bị của ${donor.name}?`)) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/emergency/push", {
+      const res = await fetch(`${API_BASE}/api/emergency/push`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -376,7 +376,7 @@ const HospitalDashboard = () => {
 
     try {
       await Promise.all(pushableDonors.map(donor =>
-        fetch("http://localhost:5000/api/emergency/push", {
+        fetch(`${API_BASE}/api/emergency/push`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -984,7 +984,7 @@ const HospitalDashboard = () => {
                 </div>
                 <button
                   onClick={async () => {
-                    await fetch(`http://localhost:5000/api/users/${selectedDonor.id}/chats`, {
+                    await fetch(`${API_BASE}/api/users/${selectedDonor.id}/chats`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
