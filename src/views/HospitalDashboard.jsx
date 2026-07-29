@@ -25,6 +25,48 @@ const HospitalDashboard = () => {
     }
   }, [hospitalUser]);
 
+  // --- BROADCAST STATE ---
+  const [broadcastMsg, setBroadcastMsg] = useState("");
+  const [broadcastTarget, setBroadcastTarget] = useState("ALL");
+  const [broadcasts, setBroadcasts] = useState([]);
+  
+  useEffect(() => {
+    fetch(`https://donor-be.onrender.com/api/broadcasts`)
+      .then(res => res.json())
+      .then(data => data.broadcasts && setBroadcasts(data.broadcasts.filter(b => b.hospitalId === hospitalUser?.id)))
+      .catch(e => console.error(e));
+
+    socket.on('broadcast-update', (updated) => {
+        setBroadcasts(prev => prev.map(b => b.id === updated.id ? { ...b, responders: updated.responders } : b));
+    });
+    return () => socket.off('broadcast-update');
+  }, [hospitalUser]);
+
+  const handleBroadcast = async () => {
+    if (!broadcastMsg.trim()) return alert("Vui lòng nhập nội dung phát khẩn!");
+    const bloodTypes = broadcastTarget === 'ALL' ? ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] : [broadcastTarget];
+    
+    if(!window.confirm(`Xác nhận phát bảng tin khẩn cấp tới TOÀN LÃNH THỔ cho nhóm máu: ${broadcastTarget}?`)) return;
+
+    try {
+        const res = await fetch(`https://donor-be.onrender.com/api/broadcasts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                hospitalId: hospitalUser.id,
+                hospitalName: hospitalUser.name,
+                bloodTypes, message: broadcastMsg 
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            setBroadcasts([data.broadcast, ...broadcasts]);
+            setBroadcastMsg("");
+            alert("Đã kết nối và phát lệnh Toàn Tuyến thành công!");
+        }
+    } catch(e) { alert("Lỗi khi phát lệnh khẩn cấp!") }
+  };
+
   const DEFAULT_INVENTORY = {
     'choray': [
       { type: 'O+', qty: 150 }, { type: 'O-', qty: 35 },
@@ -427,8 +469,55 @@ const HospitalDashboard = () => {
       {/* LAYOUT CHIA ĐÔI MÀN HÌNH CHÍNH */}
       <div className="flex flex-col xl:flex-row gap-6 items-start">
 
-        {/* BÊN TRÁI: KHO MÁU (w-1/2) */}
-        <div className="w-full xl:w-[45%] flex flex-col">
+        {/* BÊN TRÁI: THAO TÁC (w-1/2) */}
+        <div className="w-full xl:w-[45%] flex flex-col gap-6">
+
+          {/* BROADCAST KHẨN CẤP */}
+          <div className="bg-gradient-to-br from-rose-500 to-rose-700 p-6 rounded-3xl shadow-xl shadow-rose-500/20 border border-rose-400 relative overflow-hidden isolate">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-2xl rounded-full"></div>
+             <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-4">
+               <span className="w-2 h-2 rounded-full bg-white animate-ping"></span> Mạng Lưới Khẩn Cấp Toàn Lãnh Thổ
+             </h3>
+             <div className="space-y-3 relative z-10">
+               <div className="flex gap-2">
+                 <select value={broadcastTarget} onChange={e => setBroadcastTarget(e.target.value)} className="bg-white/20 text-white font-bold text-xs p-3 rounded-xl border border-white/30 outline-none w-1/3">
+                    <option value="ALL" className="text-slate-800">CẦN TẤT CẢ (ALL)</option>
+                    <option value="O+" className="text-slate-800">Chỉ mảng: O+</option>
+                    <option value="O-" className="text-slate-800">Chỉ mảng: O-</option>
+                    <option value="A+" className="text-slate-800">Chỉ mảng: A+</option>
+                    <option value="A-" className="text-slate-800">Chỉ mảng: A-</option>
+                    <option value="B+" className="text-slate-800">Chỉ mảng: B+</option>
+                    <option value="B-" className="text-slate-800">Chỉ mảng: B-</option>
+                    <option value="AB+" className="text-slate-800">Chỉ mảng: AB+</option>
+                    <option value="AB-" className="text-slate-800">Chỉ mảng: AB-</option>
+                 </select>
+                 <input type="text" value={broadcastMsg} onChange={e => setBroadcastMsg(e.target.value)} placeholder="Nhập tóm tắt tình trạng khẩn cấp..." className="w-2/3 bg-white/20 border border-white/30 p-3 rounded-xl text-white placeholder-white/60 font-medium text-sm focus:outline-none focus:bg-white/30 transition-all" />
+               </div>
+               <button onClick={handleBroadcast} className="w-full bg-white text-rose-600 hover:bg-rose-50 font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-xs transition-all active:scale-95 flex justify-center items-center gap-2">
+                  <span className="text-xl">📡</span> BẮN TÍN HIỆU CẦU CỨU
+               </button>
+             </div>
+             
+             {/* Danh sách người tiếp nhận Broadcast */}
+             {broadcasts.length > 0 && (
+               <div className="mt-6 border-t border-white/20 pt-4 space-y-2">
+                 <p className="text-[10px] uppercase font-bold text-white/50 tracking-widest">Đội Ứng Cứu Đã Phản Hồi ({broadcasts[0].responders?.length || 0})</p>
+                 <div className="max-h-40 overflow-y-auto space-y-2 pr-2">
+                   {broadcasts[0].responders?.map((r, i) => (
+                      <div key={i} className="bg-white p-2.5 rounded-xl flex items-center justify-between text-xs">
+                         <div className="font-bold text-slate-700 flex gap-2"><span className="text-rose-600">[{r.bloodType}]</span> {r.name}</div>
+                         {r.status === 'Đồng Ý' ? (
+                           <span className="bg-emerald-100 text-emerald-600 font-bold px-2 py-1 rounded-md">✅ Sẵn Sàng</span>
+                         ) : (
+                           <span className="bg-slate-100 text-slate-500 font-bold px-2 py-1 rounded-md">❌ Từ chối</span>
+                         )}
+                      </div>
+                   ))}
+                 </div>
+               </div>
+             )}
+          </div>
+
           <div className="bg-white/60 p-6 rounded-3xl shadow-xl shadow-slate-200/50 border border-white relative overflow-hidden">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
