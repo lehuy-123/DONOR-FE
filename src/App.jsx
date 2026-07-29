@@ -24,8 +24,8 @@ function App() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-2">
-              <img src="/logo4.jpg" alt="BloodBridge Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain mix-blend-multiply drop-shadow-sm" />
-              <span className="text-xl sm:text-2xl font-black text-rose-700 tracking-tighter uppercase whitespace-nowrap drop-shadow-sm">BloodBridge</span>
+              <img src="/logo_veintral.jpg" alt="VEINtral Logo" className="h-10 sm:h-12 w-auto object-contain mix-blend-multiply drop-shadow-sm" />
+              <span className="text-xl sm:text-2xl font-black text-rose-700 tracking-tighter uppercase whitespace-nowrap drop-shadow-sm hidden md:block"></span>
             </div>
             <div className="flex space-x-2 h-full py-5 overflow-x-auto custom-scrollbar">
               <NavLink

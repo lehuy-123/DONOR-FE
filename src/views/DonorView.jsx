@@ -37,7 +37,7 @@ const DonorView = () => {
 
   const [showAIChat, setShowAIChat] = useState(false);
   const [aiHistory, setAiHistory] = useState([
-    { role: 'ai', text: 'Chào bạn, tôi là trợ lý AI ảo của BloodBridge. Bạn cần ghi nhận lịch trình, hay tìm hiểu chế độ dinh dưỡng hiến máu hôm nay?' }
+    { role: 'ai', text: 'Chào bạn, tôi là trợ lý AI ảo của phần mềm hiến máu VEINtral. Bạn cần gì hôm nay?' }
   ]);
   const [aiInput, setAiInput] = useState('');
 
@@ -536,8 +536,9 @@ const DonorView = () => {
                     <label className="text-[9px] font-black uppercase text-white/70 tracking-widest px-1 block mb-1">Nhóm Máu Thực Tế</label>
                     <select className="w-full bg-rose-600 border border-white/30 p-2.5 rounded-lg text-sm font-bold text-white focus:outline-none" defaultValue={user.bloodType} onChange={e => setEditData({ ...editData, bloodType: e.target.value })}>
                       <option value="O+">O (+)</option><option value="O-">O (-)</option>
-                      <option value="A+">A (+)</option><option value="AB+">AB (+)</option>
+                      <option value="A+">A (+)</option><option value="A-">A (-)</option>
                       <option value="B+">B (+)</option><option value="B-">B (-)</option>
+                      <option value="AB+">AB (+)</option><option value="AB-">AB (-)</option>
                       <option value="Không Rõ">Không Rõ</option>
                     </select>
                   </div>
