@@ -153,10 +153,10 @@ const HospitalDashboard = () => {
   const fetchInbox = async () => {
     if (!hospitalUser) return;
     try {
-      const res = await fetch(`https://donor-be.onrender.com/api/users/scan?bloodType=all`);
+      const res = await fetch(`https://donor-be.onrender.com/api/users`);
       const data = await res.json();
       const usersWithChats = [];
-      (data.donors || []).forEach(userData => {
+      (data.users || []).forEach(userData => {
         if (userData.chats && userData.chats.some(m => m.hospitalId === hospitalUser.id)) {
           usersWithChats.push(userData);
         }
