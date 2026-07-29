@@ -116,31 +116,26 @@ const HospitalDashboard = () => {
   const [generating, setGenerating] = useState(false);
   const [donors, setDonors] = useState([]);
   const [scanned, setScanned] = useState(false);
-  const [sortBy, setSortBy] = useState('distance');
-  const [filterBy, setFilterBy] = useState('all');
+  const [filterMode, setFilterMode] = useState('distance');
 
   const processedDonors = useMemo(() => {
     let result = [...donors];
 
-    // Filtering
-    if (filterBy === 'reliable') {
-      result = result.filter(d => (d.donationCount || 0) >= 3);
-    }
-
-    // Sorting
-    if (sortBy === 'distance') {
-      result.sort((a, b) => a.distance - b.distance);
-    } else if (sortBy === 'donations') {
-      result.sort((a, b) => (b.donationCount || 0) - (a.donationCount || 0));
-    } else if (sortBy === 'status') {
-      result.sort((a, b) => {
-        const aActive = a.fcmToken || a.isMock === undefined ? 1 : 0;
-        const bActive = b.fcmToken || b.isMock === undefined ? 1 : 0;
-        return bActive - aActive;
+    // Lọc theo thời gian hiến máu >= 3 tháng
+    if (filterMode === 'eligible') {
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      result = result.filter(d => {
+        if (!d.lastDonationDate) return true; 
+        return new Date(d.lastDonationDate) <= threeMonthsAgo;
       });
     }
+
+    // Luôn ưu tiên sắp xếp theo khoảng cách (Khoảng cách mặc định)
+    result.sort((a, b) => (parseFloat(a.distance) || 0) - (parseFloat(b.distance) || 0));
+
     return result;
-  }, [donors, filterBy, sortBy]);
+  }, [donors, filterMode]);
 
   // Modal State
   const [selectedDonor, setSelectedDonor] = useState(null);
@@ -462,7 +457,7 @@ const HospitalDashboard = () => {
 
             <div className="flex gap-3">
               <button onClick={handleGenerateMock} disabled={generating} className="bg-black/20 hover:bg-black/40 text-white/90 active:scale-95 text-[10px] font-bold px-4 py-3 rounded-xl transition-all shadow-inner border border-white/10 text-center uppercase tracking-widest">
-                {generating ? 'Đang tạo...' : 'Chon'}
+                {generating ? 'Đang tạo...' : 'Chonthuii'}
               </button>
               <button onClick={() => { setHospitalUser(null); setScanned(false); setDonors([]); }} className="bg-white text-rose-600 hover:bg-rose-50 font-black px-6 py-3 rounded-xl text-sm transition-all shadow-xl flex-1 border-b-4 border-slate-200 uppercase tracking-widest flex items-center justify-center gap-2">
                 Đăng Xuất Tài Khoản Bệnh Viện <span className="text-lg leading-none"></span>
@@ -719,14 +714,9 @@ const HospitalDashboard = () => {
                   </button>
                 </div>
                 <div className="flex gap-2">
-                  <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold text-slate-600 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm flex-1 cursor-pointer">
-                    <option value="distance">📍 Ưu tiên: Gần nhất (Mặc định)</option>
-                    <option value="donations">⭐ Số lần hiến (cao-thấp)</option>
-                    <option value="status">🟢 Đang online </option>
-                  </select>
-                  <select value={filterBy} onChange={e => setFilterBy(e.target.value)} className="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold text-slate-600 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm flex-1 cursor-pointer">
-                    <option value="all">⚡ Thể trạng: Toàn bộ danh sách</option>
-                    <option value="reliable">🛡️ Thể trạng: Chuyên gia (≥ 3 lần)</option>
+                  <select value={filterMode} onChange={e => setFilterMode(e.target.value)} className="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold text-slate-600 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm w-full cursor-pointer">
+                    <option value="distance">📍 Ưu tiên: Khoảng cách (Mặc định)</option>
+                    <option value="eligible">⏰ Đủ điều kiện: Hiến máu ≥ 3 tháng</option>
                   </select>
                 </div>
               </div>
