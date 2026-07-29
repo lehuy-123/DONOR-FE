@@ -790,7 +790,8 @@ const HospitalDashboard = () => {
                             </div>
                           </div>
                           <div className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
-                            resp.status === 'ĐẾN NGAY' ? 'bg-red-500 text-white border-red-600 shadow-md animate-pulse' : 
+                            resp.status === 'ĐANG ĐẾN' ? 'bg-red-500 text-white border-red-600 shadow-md animate-pulse' : 
+                            resp.status === 'ĐÃ ĐẾN' ? 'bg-amber-500 text-white border-amber-600 shadow-md animate-pulse' : 
                             resp.status === 'CHẤP NHẬN' ? 'bg-blue-600 text-white border-blue-700 shadow-md' : 'bg-slate-100 text-slate-400 border-slate-200'
                           }`}>
                             {resp.status}
