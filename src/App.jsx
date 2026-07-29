@@ -9,16 +9,11 @@ function App() {
       {/* Navbar with Glassmorphism */}
       <nav className="bg-white/70 backdrop-blur-lg sticky top-0 z-50 border-b border-rose-100 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-400 to-rose-600 shadow-lg shadow-rose-200 flex items-center justify-center text-white font-black text-xl">
-                🩸
-              </div>
-              <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-red-500 text-2xl tracking-tight leading-none">
-                BloodBridge
-              </span>
+              <img src="/logo2.jpg" alt="BloodBridge Logo" className="h-14 sm:h-16 object-contain mix-blend-multiply" />
             </div>
-            <div className="flex space-x-2 h-full py-4">
+            <div className="flex space-x-2 h-full py-5">
               <NavLink
                 to="/"
                 className={({ isActive }) => `px-4 py-2 rounded-full text-sm font-bold uppercase transition-all duration-300 ${isActive ? 'bg-rose-100 text-rose-700 shadow-inner' : 'text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}

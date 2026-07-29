@@ -126,7 +126,7 @@ const HospitalDashboard = () => {
       const threeMonthsAgo = new Date();
       threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
       result = result.filter(d => {
-        if (!d.lastDonationDate) return true; 
+        if (!d.lastDonationDate) return true;
         return new Date(d.lastDonationDate) <= threeMonthsAgo;
       });
     }
@@ -180,21 +180,21 @@ const HospitalDashboard = () => {
     fetch(`https://donor-be.onrender.com/api/emergency-missions?hospitalId=${hospitalUser.id}`)
       .then(res => res.json())
       .then(data => {
-         if (data.missions) {
-            // Tính toán distance cho từng mission ngay khi tải
-            const initMissions = data.missions.map(m => {
-                if (m.user?.location?.lat && hospitalUser?.lat && !m.user.distance) {
-                    const r = 6371; const p = Math.PI / 180;
-                    const a = 0.5 - Math.cos((m.user.location.lat - hospitalUser.lat) * p) / 2 +
-                      Math.cos(hospitalUser.lat * p) * Math.cos(m.user.location.lat * p) *
-                      (1 - Math.cos((m.user.location.lng - hospitalUser.lng) * p)) / 2;
-                    const km = 2 * r * Math.asin(Math.sqrt(a));
-                    m.user.distance = km.toFixed(1);
-                }
-                return m;
-            });
-            setEmergencyResponders(initMissions);
-         }
+        if (data.missions) {
+          // Tính toán distance cho từng mission ngay khi tải
+          const initMissions = data.missions.map(m => {
+            if (m.user?.location?.lat && hospitalUser?.lat && !m.user.distance) {
+              const r = 6371; const p = Math.PI / 180;
+              const a = 0.5 - Math.cos((m.user.location.lat - hospitalUser.lat) * p) / 2 +
+                Math.cos(hospitalUser.lat * p) * Math.cos(m.user.location.lat * p) *
+                (1 - Math.cos((m.user.location.lng - hospitalUser.lng) * p)) / 2;
+              const km = 2 * r * Math.asin(Math.sqrt(a));
+              m.user.distance = km.toFixed(1);
+            }
+            return m;
+          });
+          setEmergencyResponders(initMissions);
+        }
       })
       .catch(e => console.log(e));
   }, [hospitalUser]);
@@ -215,33 +215,33 @@ const HospitalDashboard = () => {
     };
 
     const emergencyResponseListener = (payload) => {
-        if (payload.isCompleted) {
-           setEmergencyResponders(prev => prev.filter(p => p.id !== payload.id));
-           return;
-        }
+      if (payload.isCompleted) {
+        setEmergencyResponders(prev => prev.filter(p => p.id !== payload.id));
+        return;
+      }
 
-        // Tự động tính toán khoảng cách từ tọa độ của người hiến tới Bệnh viện
-        if (payload.user?.location?.lat && hospitalUser?.lat && !payload.user.distance) {
-            const r = 6371; const p = Math.PI / 180;
-            const a = 0.5 - Math.cos((payload.user.location.lat - hospitalUser.lat) * p) / 2 +
-              Math.cos(hospitalUser.lat * p) * Math.cos(payload.user.location.lat * p) *
-              (1 - Math.cos((payload.user.location.lng - hospitalUser.lng) * p)) / 2;
-            const km = 2 * r * Math.asin(Math.sqrt(a));
-            payload.user.distance = km.toFixed(1);
-        }
+      // Tự động tính toán khoảng cách từ tọa độ của người hiến tới Bệnh viện
+      if (payload.user?.location?.lat && hospitalUser?.lat && !payload.user.distance) {
+        const r = 6371; const p = Math.PI / 180;
+        const a = 0.5 - Math.cos((payload.user.location.lat - hospitalUser.lat) * p) / 2 +
+          Math.cos(hospitalUser.lat * p) * Math.cos(payload.user.location.lat * p) *
+          (1 - Math.cos((payload.user.location.lng - hospitalUser.lng) * p)) / 2;
+        const km = 2 * r * Math.asin(Math.sqrt(a));
+        payload.user.distance = km.toFixed(1);
+      }
 
-        setEmergencyResponders(prev => {
-           // Dùng id của logic mission mới thay vì payload.user.id
-           const filtered = prev.filter(p => p.id !== payload.id);
-           return [payload, ...filtered];
-        });
+      setEmergencyResponders(prev => {
+        // Dùng id của logic mission mới thay vì payload.user.id
+        const filtered = prev.filter(p => p.id !== payload.id);
+        return [payload, ...filtered];
+      });
     };
 
     socket.on('receive-message', messageListener);
     socket.on('emergency-mission-update', emergencyResponseListener);
     return () => {
-        socket.off('receive-message', messageListener);
-        socket.off('emergency-mission-update', emergencyResponseListener);
+      socket.off('receive-message', messageListener);
+      socket.off('emergency-mission-update', emergencyResponseListener);
     };
   }, [hospitalUser, selectedDonor]);
 
@@ -548,7 +548,7 @@ const HospitalDashboard = () => {
           <div className="bg-gradient-to-br from-rose-500 to-rose-700 p-6 rounded-3xl shadow-xl shadow-rose-500/20 border border-rose-400 relative overflow-hidden isolate">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-2xl rounded-full"></div>
             <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-4">
-              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span> Mạng Lưới Khẩn Cấp Toàn Lãnh Thổ
+              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span> Emergency
             </h3>
             <div className="space-y-3 relative z-10">
               <div className="flex gap-2">
@@ -721,6 +721,34 @@ const HospitalDashboard = () => {
             </div>
           </section>
 
+          {/* DANH SÁCH PHẢN HỒI KHẨN CẤP ĐANG DIỄN RA (ĐỘC LẬP VỚI RADAR) */}
+          {emergencyResponders.length > 0 && (
+            <div className="bg-red-50 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')] p-6 rounded-3xl border border-red-200 shadow-xl shadow-red-500/10 mb-2">
+              <h4 className="text-red-700 font-black tracking-widest text-sm uppercase mb-4 flex items-center gap-2"><span className="animate-pulse text-2xl drop-shadow-md">🚨</span> Nhóm Phản Hồi Khẩn Cấp Đang Thực Thi</h4>
+              <div className="flex flex-col gap-3">
+                {emergencyResponders.map((resp, i) => (
+                  <div key={i} onClick={() => setSelectedDonor(resp.user)} className="bg-white/90 backdrop-blur-sm cursor-pointer hover:border-red-400 hover:shadow-md rounded-2xl p-5 shadow-sm border border-red-100 flex items-center justify-between transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-100 to-rose-200 border-2 border-white shadow-sm flex items-center justify-center font-black text-red-600 text-lg">
+                        {resp.user.bloodType}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-800 text-base">{resp.user.name}</p>
+                        <p className="text-xs font-bold text-slate-500 font-mono mt-1 flex items-center gap-2">📞 {resp.user.phone} {resp.user.distance && <span className="bg-rose-50 text-rose-600 px-1 py-0.5 rounded ml-2">~{parseFloat(resp.user.distance).toFixed(1)} km</span>}</p>
+                      </div>
+                    </div>
+                    <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border ${resp.status === 'ĐANG ĐẾN' ? 'bg-red-500 text-white border-red-600 shadow-lg animate-pulse' :
+                      resp.status === 'ĐÃ ĐẾN' ? 'bg-amber-500 text-white border-amber-600 shadow-lg animate-pulse' :
+                        resp.status === 'CHẤP NHẬN' ? 'bg-blue-600 text-white border-blue-700 shadow-md' : 'bg-slate-100 text-slate-400 border-slate-200'
+                      }`}>
+                      {resp.status}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* KHỐI 3: DANH SÁCH KẾT QUẢ RADAR */}
           {loading ? (
             <section className="bg-rose-50/80 backdrop-blur-xl rounded-3xl border-2 border-white p-6 shadow-xl shadow-rose-200/50 h-[500px] flex flex-col items-center justify-center relative overflow-hidden isolate animate-in zoom-in-95 duration-500">
@@ -774,34 +802,6 @@ const HospitalDashboard = () => {
               </div>
 
               <div className="flex flex-col gap-3">
-                {emergencyResponders.length > 0 && (
-                  <div className="mb-2 bg-red-50 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')] p-5 rounded-2xl border-2 border-red-200 shadow-inner">
-                    <h4 className="text-red-700 font-black tracking-widest text-xs uppercase mb-3 flex items-center gap-2"><span className="animate-pulse text-lg">🚨</span> Phản Hồi Lệnh Báo Động Khẩn Cấp</h4>
-                    <div className="flex flex-col gap-3">
-                      {emergencyResponders.map((resp, i) => (
-                        <div key={i} onClick={() => setSelectedDonor(resp.user)} className="bg-white cursor-pointer hover:border-red-300 rounded-xl p-4 shadow-sm border border-red-100 flex items-center justify-between transition-all">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-100 to-rose-200 border-2 border-white shadow-sm flex items-center justify-center font-black text-red-600">
-                               {resp.user.bloodType}
-                            </div>
-                            <div>
-                               <p className="font-bold text-slate-800 text-sm">{resp.user.name}</p>
-                               <p className="text-[10px] font-bold text-slate-400 font-mono mt-0.5">📞 {resp.user.phone}</p>
-                            </div>
-                          </div>
-                          <div className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
-                            resp.status === 'ĐANG ĐẾN' ? 'bg-red-500 text-white border-red-600 shadow-md animate-pulse' : 
-                            resp.status === 'ĐÃ ĐẾN' ? 'bg-amber-500 text-white border-amber-600 shadow-md animate-pulse' : 
-                            resp.status === 'CHẤP NHẬN' ? 'bg-blue-600 text-white border-blue-700 shadow-md' : 'bg-slate-100 text-slate-400 border-slate-200'
-                          }`}>
-                            {resp.status}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {processedDonors.map((donor) => {
                   const isOnline = donor.pushSubscription || donor.isOnline;
                   return (
