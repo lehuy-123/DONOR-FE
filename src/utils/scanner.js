@@ -1,3 +1,5 @@
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "https://donor-be.onrender.com");
+
 export const scanDonors = async (requiredBloodType, radiusInKm, hospitalLocation) => {
     try {
         const queryParams = new URLSearchParams({
@@ -7,12 +9,12 @@ export const scanDonors = async (requiredBloodType, radiusInKm, hospitalLocation
             lng: hospitalLocation?.lng || ''
         }).toString();
 
-        const response = await fetch(`http://localhost:5000/api/users/scan?${queryParams}`);
+        const response = await fetch(`${API_BASE}/api/users/scan?${queryParams}`);
         const data = await response.json();
-        
+
         return data.donors || [];
     } catch (e) {
         console.error("Lỗi gọi Server Scan:", e);
-        return []; 
+        return [];
     }
 }

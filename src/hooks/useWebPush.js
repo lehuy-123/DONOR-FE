@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { updateDonorProfile } from '../utils/firestore';
 
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "https://donor-be.onrender.com");
+
 export const useWebPush = () => {
   const [fcmToken, setFcmToken] = useState(null);
   const [permission, setPermission] = useState('default');
@@ -8,40 +10,40 @@ export const useWebPush = () => {
   const requestPermissionAndGetToken = async (userId) => {
     try {
       if (typeof window !== 'undefined' && 'Notification' in window) {
-         const perm = await Notification.requestPermission();
-         setPermission(perm);
-         if (perm !== 'granted') return null;
+        const perm = await Notification.requestPermission();
+        setPermission(perm);
+        if (perm !== 'granted') return null;
       }
 
       // Đăng ký Service Worker & lấy VAPID key
-      const res = await fetch('http://localhost:5000/api/vapid-key');
+      const res = await fetch(`${API_BASE}/api/vapid-key`);
       const { publicKey } = await res.json();
 
       const registration = await navigator.serviceWorker.ready;
       let subscription = await registration.pushManager.getSubscription();
-      
+
       if (!subscription) {
-          subscription = await registration.pushManager.subscribe({
-              userVisibleOnly: true,
-              applicationServerKey: urlBase64ToUint8Array(publicKey)
-          });
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey)
+        });
       }
 
       const pushSubscriptionObj = subscription.toJSON();
       setFcmToken("active"); // Dummy token for UI
 
       if (userId) {
-         await updateDonorProfile(userId, { pushSubscription: pushSubscriptionObj });
-         const savedMe = localStorage.getItem('me_donor');
-         if (savedMe) {
-            const parsedMe = JSON.parse(savedMe);
-            localStorage.setItem('me_donor', JSON.stringify({...parsedMe, fcmToken: "active"}));
-         }
+        await updateDonorProfile(userId, { pushSubscription: pushSubscriptionObj });
+        const savedMe = localStorage.getItem('me_donor');
+        if (savedMe) {
+          const parsedMe = JSON.parse(savedMe);
+          localStorage.setItem('me_donor', JSON.stringify({ ...parsedMe, fcmToken: "active" }));
+        }
       }
       return pushSubscriptionObj;
     } catch (error) {
-       console.error("Lỗi đăng ký Push:", error);
-       return null;
+      console.error("Lỗi đăng ký Push:", error);
+      return null;
     }
   };
 

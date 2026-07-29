@@ -3,8 +3,10 @@ import { scanDonors } from '../utils/scanner';
 import { generateMockData } from '../utils/firestore';
 import { io } from "socket.io-client";
 
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "https://donor-be.onrender.com");
+
 // Khởi tạo Socket.io client kết nối tới Node.js Backend
-const socket = io("http://localhost:5000");
+const socket = io(`${API_BASE}`);
 const HOSPITALS = [
   { id: 'choray', name: 'Bệnh Viện Chợ Rẫy', lat: 10.7583, lng: 106.6570, color: 'from-blue-700 to-blue-900', avatar: '/bvchoray.png', isLogo: true },
   { id: 'nd115', name: 'Nhân Dân 115', lat: 10.7758, lng: 106.6666, color: 'from-emerald-700 to-emerald-900', avatar: '/bv115.png', isLogo: true },
@@ -35,7 +37,7 @@ const HospitalDashboard = () => {
   const [selectedResponder, setSelectedResponder] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/broadcasts`)
+    fetch(`${API_BASE}/api/broadcasts`)
       .then(res => res.json())
       .then(data => data.broadcasts && setBroadcasts(data.broadcasts.filter(b => b.hospitalId === hospitalUser?.id)))
       .catch(e => console.error(e));
@@ -54,7 +56,7 @@ const HospitalDashboard = () => {
     if (!window.confirm(`Xác nhận phát bản tin tới TOÀN LÃNH THỔ cho nhóm máu: ${broadcastTarget}?`)) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/broadcasts`, {
+      const res = await fetch(`${API_BASE}/api/broadcasts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -158,7 +160,7 @@ const HospitalDashboard = () => {
   const fetchInbox = async () => {
     if (!hospitalUser) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/users`);
+      const res = await fetch(`${API_BASE}/api/users`);
       const data = await res.json();
       const usersWithChats = [];
       (data.users || []).forEach(userData => {
@@ -182,7 +184,7 @@ const HospitalDashboard = () => {
 
   useEffect(() => {
     if (!hospitalUser) return;
-    fetch(`http://localhost:5000/api/emergency-missions?hospitalId=${hospitalUser.id}`)
+    fetch(`${API_BASE}/api/emergency-missions?hospitalId=${hospitalUser.id}`)
       .then(res => res.json())
       .then(data => {
         if (data.missions) {
@@ -253,7 +255,7 @@ const HospitalDashboard = () => {
   // Nạp lịch sử từ Backend mỗi khi mở Profile Modal
   useEffect(() => {
     if (!selectedDonor) return;
-    fetch(`http://localhost:5000/api/users/${selectedDonor.id}/chats`)
+    fetch(`${API_BASE}/api/users/${selectedDonor.id}/chats`)
       .then(res => res.json())
       .then(data => setMessages(data.chats || []))
       .catch(e => console.error(e));
@@ -317,7 +319,7 @@ const HospitalDashboard = () => {
 
     const text = chatMessage;
     setChatMessage("");
-    await fetch(`http://localhost:5000/api/users/${selectedDonor.id}/chats`, {
+    await fetch(`${API_BASE}/api/users/${selectedDonor.id}/chats`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, sender: hospitalUser.name, hospitalId: hospitalUser.id })
@@ -329,7 +331,7 @@ const HospitalDashboard = () => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async (event) => {
-      await fetch(`http://localhost:5000/api/users/${selectedDonor.id}/chats`, {
+      await fetch(`${API_BASE}/api/users/${selectedDonor.id}/chats`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: "📷 Hình ảnh Y khoa đính kèm", sender: hospitalUser.name, hospitalId: hospitalUser.id, image: event.target.result })
@@ -346,7 +348,7 @@ const HospitalDashboard = () => {
     if (!window.confirm(`Phát lệnh báo động khẩn cấp tới thiết bị của ${donor.name}?`)) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/emergency/push", {
+      const res = await fetch(`${API_BASE}/api/emergency/push`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -376,7 +378,7 @@ const HospitalDashboard = () => {
 
     try {
       await Promise.all(pushableDonors.map(donor =>
-        fetch("http://localhost:5000/api/emergency/push", {
+        fetch(`${API_BASE}/api/emergency/push`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -557,87 +559,87 @@ const HospitalDashboard = () => {
         <div className="w-full xl:w-[45%] flex flex-col gap-6">
 
           {/* BẢNG TIN TRONG NGÀY & ĐẶT LỊCH */}
-          <div className="bg-gradient-to-br from-rose-500 to-rose-700 p-6 rounded-3xl shadow-xl shadow-rose-500/20 border border-rose-400 relative overflow-hidden isolate">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-2xl rounded-full"></div>
-            <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-4">
-              <span className="w-2 h-2 rounded-full bg-white"></span> QUẢN LÝ BẢNG TIN (BULLETIN)
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden isolate flex flex-col min-h-[500px]">
+            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2 mb-5">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-300"></span> LỊCH ĐĂNG KÍ HIẾN MÁU
             </h3>
-            <div className="space-y-4 relative z-10">
-              <div className="flex bg-white/20 p-1 rounded-xl">
-                <button onClick={() => setBroadcastType('daily')} className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-all ${broadcastType === 'daily' ? 'bg-white text-rose-600 shadow' : 'text-white hover:bg-white/10'}`}>
+            <div className="space-y-4 relative z-10 w-full mb-2">
+              <div className="flex bg-slate-50 p-1.5 rounded-xl border border-slate-100">
+                <button onClick={() => setBroadcastType('daily')} className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-all ${broadcastType === 'daily' ? 'bg-white text-rose-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:bg-slate-100'}`}>
                   Trong ngày
                 </button>
-                <button onClick={() => setBroadcastType('schedule')} className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-all ${broadcastType === 'schedule' ? 'bg-white text-rose-600 shadow' : 'text-white hover:bg-white/10'}`}>
+                <button onClick={() => setBroadcastType('schedule')} className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-all ${broadcastType === 'schedule' ? 'bg-white text-rose-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:bg-slate-100'}`}>
                   Đặt lịch hiến
                 </button>
               </div>
 
               {broadcastType === 'schedule' && (
-                <div className="flex gap-2">
-                  <input 
-                    type="date" 
-                    value={scheduleDate} 
-                    onChange={e => setScheduleDate(e.target.value)} 
-                    className="w-2/3 bg-white/20 border border-white/30 p-3 rounded-xl text-white font-medium text-sm focus:outline-none focus:bg-white/30 transition-all appearance-none" 
+                <div className="flex gap-3">
+                  <input
+                    type="date"
+                    value={scheduleDate}
+                    onChange={e => setScheduleDate(e.target.value)}
+                    className="w-1/2 bg-white border border-slate-200 p-3 rounded-xl text-slate-700 font-medium text-sm focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all shadow-inner uppercase"
                   />
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     placeholder="Giới hạn (người)"
-                    value={maxDonors} 
-                    onChange={e => setMaxDonors(e.target.value)} 
-                    className="w-1/3 bg-white/20 border border-white/30 p-3 rounded-xl text-white placeholder-white/60 font-medium text-sm focus:outline-none focus:bg-white/30 transition-all" 
+                    value={maxDonors}
+                    onChange={e => setMaxDonors(e.target.value)}
+                    className="w-1/2 bg-white border border-slate-200 p-3 rounded-xl text-slate-700 placeholder-slate-400 font-medium text-sm focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all shadow-inner"
                   />
                 </div>
               )}
 
-              <div className="flex gap-2">
-                <select value={broadcastTarget} onChange={e => setBroadcastTarget(e.target.value)} className="bg-white/20 text-white font-bold text-xs p-3 rounded-xl border border-white/30 outline-none w-1/3">
-                  <option value="ALL" className="text-slate-800">CẦN TẤT CẢ</option>
-                  <option value="O+" className="text-slate-800">Nhóm: O+</option>
-                  <option value="O-" className="text-slate-800">Nhóm: O-</option>
-                  <option value="A+" className="text-slate-800">Nhóm: A+</option>
-                  <option value="A-" className="text-slate-800">Nhóm: A-</option>
-                  <option value="B+" className="text-slate-800">Nhóm: B+</option>
-                  <option value="B-" className="text-slate-800">Nhóm: B-</option>
-                  <option value="AB+" className="text-slate-800">Nhóm: AB+</option>
-                  <option value="AB-" className="text-slate-800">Nhóm: AB-</option>
+              <div className="flex gap-3">
+                <select value={broadcastTarget} onChange={e => setBroadcastTarget(e.target.value)} className="bg-white text-slate-800 font-bold text-xs p-3 rounded-xl border border-slate-200 outline-none w-1/3 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all shadow-inner">
+                  <option value="ALL">CẦN TẤT CẢ</option>
+                  <option value="O+">Nhóm: O+</option>
+                  <option value="O-">Nhóm: O-</option>
+                  <option value="A+">Nhóm: A+</option>
+                  <option value="A-">Nhóm: A-</option>
+                  <option value="B+">Nhóm: B+</option>
+                  <option value="B-">Nhóm: B-</option>
+                  <option value="AB+">Nhóm: AB+</option>
+                  <option value="AB-">Nhóm: AB-</option>
                 </select>
-                <input type="text" value={broadcastMsg} onChange={e => setBroadcastMsg(e.target.value)} placeholder="Nhập ghi chú hoặc yêu cầu..." className="w-2/3 bg-white/20 border border-white/30 p-3 rounded-xl text-white placeholder-white/60 font-medium text-sm focus:outline-none focus:bg-white/30 transition-all" />
+                <input type="text" value={broadcastMsg} onChange={e => setBroadcastMsg(e.target.value)} placeholder="Nhập ghi chú hoặc yêu cầu chi tiết..." className="w-2/3 bg-white border border-slate-200 p-3 rounded-xl text-slate-700 placeholder-slate-400 font-medium text-sm focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all shadow-inner" />
               </div>
 
-              <button onClick={handleBroadcast} className="w-full bg-white text-rose-600 hover:bg-rose-50 font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-xs transition-all active:scale-95 flex justify-center items-center gap-2">
+              <button onClick={handleBroadcast} className="w-full bg-slate-800 hover:bg-black text-white font-black py-3.5 rounded-xl shadow-md uppercase tracking-widest text-xs transition-all active:scale-95 flex justify-center items-center gap-2 mt-2">
                 <span>➕</span> ĐĂNG BẢN TIN LÊN HỆ THỐNG
               </button>
             </div>
 
             {/* Lịch sử Bản Tin Của Bệnh Viện */}
             {broadcasts.length > 0 && (
-              <div className="mt-6 border-t border-white/20 pt-4 space-y-4 max-h-80 overflow-y-auto custom-scrollbar pr-2">
-                <p className="text-[10px] uppercase font-bold text-white/50 tracking-widest sticky top-0 bg-rose-700/80 backdrop-blur-sm z-10 pb-1">Các bản tin hiện hành & Lượt đăng ký</p>
-                {broadcasts.map(b => (
-                  <div key={b.id} className="bg-white/10 rounded-xl p-3 border border-white/20">
-                     <div className="text-white text-[11px] font-black uppercase mb-1 flex justify-between">
-                        <span>{b.type === 'schedule' ? `📅 ĐẶT LỊCH: ${b.scheduleDate}` : '📣 TRONG NGÀY'}</span>
-                        <span className="text-rose-200">[{b.bloodTypes.join(', ')}]</span>
-                     </div>
-                     <p className="text-[11px] text-white/80 font-medium mb-2 border-l-2 border-white/30 pl-2">{b.message}</p>
-                     
-                     <div className="space-y-1.5 mt-2 border-t border-white/10 pt-2">
-                        <span className="text-[9px] text-white/60 mb-1 block uppercase font-bold">Danh sách Đăng Ký ({b.responders?.length || 0})</span>
-                        {b.responders?.filter(r => r.status === 'Đồng Ý').map((r, i) => (
-                           <button key={i} onClick={() => setSelectedResponder(r)} className="w-full text-left bg-white p-2 rounded-lg flex items-center justify-between text-[11px] hover:bg-slate-50 transition-colors shadow-sm">
-                             <div className="font-bold text-slate-800 flex gap-1.5 truncate">
-                               <span className="text-rose-600">[{r.bloodType}]</span> {r.name}
-                             </div>
-                             <span className="text-[9px] uppercase tracking-widest bg-emerald-100 text-emerald-600 font-bold px-1.5 py-0.5 rounded ml-1">Xem đơn</span>
-                           </button>
-                        ))}
-                        {b.responders?.filter(r => r.status === 'Từ Chối').map((r, i) => (
-                           <div key={i} className="text-[10px] text-white/50 pl-1 font-medium flex items-center gap-1">
-                             <span className="text-xs">❌</span> {r.name} đã bỏ qua lịch này.
-                           </div>
-                        ))}
-                     </div>
+              <div className="mt-4 pt-1 space-y-4 max-h-[350px] overflow-y-auto custom-scrollbar pr-2 flex-1">
+                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest sticky top-0 bg-white/95 backdrop-blur-md z-10 py-2 border-b border-slate-100 shadow-sm -mx-2 px-2">Bản tin {broadcastType === 'schedule' ? 'đặt lịch' : 'trong ngày'} & Lượt đăng ký</p>
+                {broadcasts.filter(b => b.type === broadcastType || (!b.type && broadcastType === 'daily')).map(b => (
+                  <div key={b.id} className="bg-slate-50/50 rounded-xl p-4 border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+                    {b.type !== 'schedule' && <div className="absolute top-0 right-0 w-8 h-8 bg-rose-500/10 rounded-bl-3xl"></div>}
+                    <div className="text-slate-800 text-[11px] font-black uppercase mb-1.5 flex justify-between items-center">
+                      <span className="flex items-center gap-1.5">{b.type === 'schedule' ? `📅 ĐẶT LỊCH: ${b.scheduleDate}` : <><span className="text-rose-500 animate-pulse">🔴</span> CẦN TRONG NGÀY</>}</span>
+                      <span className="text-rose-600 bg-rose-100 px-2 py-0.5 rounded-md shadow-sm border border-rose-200/50">[{b.bloodTypes.join(', ')}]</span>
+                    </div>
+                    <p className="text-xs text-slate-600 font-medium mb-3 border-l-2 border-rose-300 pl-2 opacity-90">{b.message}</p>
+
+                    <div className="space-y-2 mt-3 border-t border-slate-100 pt-3">
+                      <span className="text-[10px] text-slate-500 mb-1 block uppercase font-bold tracking-wider">Danh sách Đăng Ký ({b.responders?.length || 0})</span>
+                      {b.responders?.filter(r => r.status === 'Đồng Ý').map((r, i) => (
+                        <button key={i} onClick={() => setSelectedResponder(r)} className="w-full text-left bg-white p-2.5 rounded-lg flex items-center justify-between text-xs hover:bg-emerald-50 hover:border-emerald-200 border border-slate-200/80 transition-all shadow-sm">
+                          <div className="font-bold text-slate-700 flex gap-2 items-center truncate">
+                            <span className="text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">[{r.bloodType}]</span> {r.name}
+                          </div>
+                          <span className="text-[9px] uppercase tracking-widest bg-emerald-100 text-emerald-700 font-black px-2 py-1 rounded shadow-sm border border-emerald-200/50">Xem đơn</span>
+                        </button>
+                      ))}
+                      {b.responders?.filter(r => r.status === 'Từ Chối').map((r, i) => (
+                        <div key={i} className="text-[10px] text-slate-400 pl-1 font-medium flex items-center gap-1 opacity-70">
+                          <span className="text-xs grayscale">❌</span> {r.name} đã bỏ qua.
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -984,7 +986,7 @@ const HospitalDashboard = () => {
                 </div>
                 <button
                   onClick={async () => {
-                    await fetch(`http://localhost:5000/api/users/${selectedDonor.id}/chats`, {
+                    await fetch(`${API_BASE}/api/users/${selectedDonor.id}/chats`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({

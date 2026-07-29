@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+
+const API_BASE = import.meta.env.VITE_API_URL || "https://donor-be.onrender.com";
 import { useWebPush } from '../hooks/useWebPush';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { loginOrRegisterDonor, updateDonorProfile } from '../utils/firestore';
 import { io } from "socket.io-client";
 
 // Khởi tạo Socket.io client kết nối tới Node.js Backend
-const socket = io("http://localhost:5000");
+const socket = io(`${API_BASE}`);
 
 const DonorView = () => {
   const { fcmToken, permission, requestPermissionAndGetToken } = useWebPush();
@@ -57,7 +59,7 @@ const DonorView = () => {
     if (!activeId) return;
 
     // Lấy lịch sử chat bằng REST API
-    fetch(`http://localhost:5000/api/users/${activeId}/chats`)
+    fetch(`${API_BASE}/api/users/${activeId}/chats`)
       .then(res => {
         if (res.status === 404 || res.status === 401) {
           localStorage.removeItem('me_donor');
@@ -74,7 +76,7 @@ const DonorView = () => {
       })
       .catch(e => console.error(e));
 
-    fetch(`http://localhost:5000/api/broadcasts`)
+    fetch(`${API_BASE}/api/broadcasts`)
       .then(res => res.json())
       .then(data => {
         if (data.broadcasts) setBroadcasts(data.broadcasts);
@@ -154,7 +156,7 @@ const DonorView = () => {
   useEffect(() => {
     const activeId = user?.id || user?._id;
     if (!activeId) return;
-    fetch(`http://localhost:5000/api/emergency-missions?userId=${activeId}`)
+    fetch(`${API_BASE}/api/emergency-missions?userId=${activeId}`)
       .then(res => res.json())
       .then(data => {
         if (data.missions && data.missions.length > 0) {
@@ -313,7 +315,7 @@ const DonorView = () => {
                         helperLng: location?.lng || user.location?.lng || (106.7009 + (Math.random() * 0.1 - 0.05)),
                         respondedAt: new Date().toISOString()
                       };
-                      await fetch(`http://localhost:5000/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                      await fetch(`${API_BASE}/api/broadcasts/${activeBroadcastForm.id}/respond`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                       });
@@ -332,7 +334,7 @@ const DonorView = () => {
                       helperName: supportForm.helperName, helperPhone: supportForm.helperPhone, helperBloodType: supportForm.helperBloodType,
                       respondedAt: new Date().toISOString()
                     };
-                    await fetch(`http://localhost:5000/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                    await fetch(`${API_BASE}/api/broadcasts/${activeBroadcastForm.id}/respond`, {
                       method: 'POST', headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify(payload)
                     });
@@ -387,7 +389,7 @@ const DonorView = () => {
               <button disabled={loading} onClick={async () => {
                 setLoading(true);
                 try {
-                  await fetch('http://localhost:5000/api/emergency-missions', {
+                  await fetch(`${API_BASE}/api/emergency-missions`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ hospitalId: emergencyAlert.hospitalId, hospitalName: emergencyAlert.sender, userId: user.id || user._id, user: { ...user, id: user.id || user._id }, status: 'ĐANG ĐẾN' })
                   });
@@ -399,7 +401,7 @@ const DonorView = () => {
               <button disabled={loading} onClick={async () => {
                 setLoading(true);
                 try {
-                  await fetch('http://localhost:5000/api/emergency-missions', {
+                  await fetch(`${API_BASE}/api/emergency-missions`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ hospitalId: emergencyAlert.hospitalId, hospitalName: emergencyAlert.sender, userId: user.id || user._id, user: { ...user, id: user.id || user._id }, status: 'CHẤP NHẬN' })
                   });
@@ -449,7 +451,7 @@ const DonorView = () => {
 
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               <button disabled={activeMission.status !== 'ĐANG ĐẾN' && activeMission.status !== 'CHẤP NHẬN'} onClick={async () => {
-                await fetch(`http://localhost:5000/api/emergency-missions/${activeMission.id}/status`, {
+                await fetch(`${API_BASE}/api/emergency-missions/${activeMission.id}/status`, {
                   method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'ĐÃ ĐẾN' })
                 });
               }} className={`px-6 py-4 sm:py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${activeMission.status === 'ĐANG ĐẾN' || activeMission.status === 'CHẤP NHẬN' ? 'bg-white text-rose-600 hover:bg-slate-100 shadow-lg active:scale-95' :
@@ -460,7 +462,7 @@ const DonorView = () => {
 
               <button disabled={activeMission.status !== 'ĐÃ ĐẾN'} onClick={async () => {
                 if (!window.confirm('Xác nhận bạn đã hoàn tất quy trình lấy máu tại Bệnh viện?')) return;
-                await fetch(`http://localhost:5000/api/emergency-missions/${activeMission.id}/status`, {
+                await fetch(`${API_BASE}/api/emergency-missions/${activeMission.id}/status`, {
                   method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'ĐÃ HIẾN MÁU' })
                 });
               }} className={`px-6 py-4 sm:py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${activeMission.status === 'ĐÃ ĐẾN' ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95' :
@@ -571,30 +573,31 @@ const DonorView = () => {
             </div>
           </div>
 
+          {/* MESSAGE ROOM CHUYÊN NGHIỆP */}
           <div id="chat-room-section" className="bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col flex-1 min-h-[450px]">
-            <div className="px-4 sm:px-8 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                <img src="/hospital_avatar.png" alt="Phòng Trực Ban" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border border-slate-200 shadow-sm shrink-0" />
+            <div className="p-4 border-b border-slate-100 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <img src="/hospital_avatar.png" alt="Phòng Trực Ban" className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <select value={selectedHospitalId} onChange={e => setSelectedHospitalId(e.target.value)} className="w-full font-black text-slate-800 text-sm sm:text-lg bg-transparent outline-none cursor-pointer hover:text-blue-600 transition-colors truncate">
-                    <option value="choray">Phòng Trực Ban: Chợ Rẫy</option>
-                    <option value="nd115">Phòng Trực Ban: N.Dân 115</option>
-                    <option value="giadinh">Phòng Trực Ban: Nhân Dân Gia Định</option>
+                  <select value={selectedHospitalId} onChange={e => setSelectedHospitalId(e.target.value)} className="w-full font-black text-slate-800 text-sm bg-transparent outline-none cursor-pointer hover:text-blue-600 transition-colors truncate">
+                    <option value="choray">Trực Ban: Chợ Rẫy</option>
+                    <option value="nd115">Trực Ban: N.Dân 115</option>
+                    <option value="giadinh">Trực Ban: Gia Định</option>
                   </select>
-                  <p className="text-[9px] sm:text-[10px] uppercase font-bold text-emerald-500 tracking-widest flex items-center gap-1.5 mt-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> KÊNH TRUYỀN DỮ LIỆU ĐỘC LẬP
+                  <p className="text-[9px] uppercase font-bold text-emerald-500 tracking-widest flex items-center gap-1 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> KÊNH DỮ LIỆU ĐỘC LẬP
                   </p>
                 </div>
               </div>
 
               <button onClick={async () => {
-                await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
+                await fetch(`${API_BASE}/api/users/${user?.id || user?._id}/chats`, {
                   method: 'POST', headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ text: "🟢 TÔI KHỎE MẠNH! ĐÃ NHẬN TIẾP ĐƯỜNG VÀ SẴN SÀNG DI CHUYỂN NGAY LẬP TỨC.", sender: 'donor', hospitalId: selectedHospitalId })
                 });
                 alert("Đã gửi Báo Cáo Thể Trạng!");
-              }} className="w-full sm:w-auto px-4 py-3 sm:py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700">
-                ⚡ BÁO CÁO THỂ TRẠNG
+              }} className="w-full py-2.5 rounded-xl text-[10px] font-black uppercase transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700">
+                ⚡ GỬI BÁO CÁO THỂ TRẠNG
               </button>
             </div>
 
@@ -619,19 +622,19 @@ const DonorView = () => {
               )}
             </div>
 
-            <div className="p-4 sm:p-5 bg-white border-t border-slate-100 rounded-b-[2rem]">
+            <div className="p-3 bg-white border-t border-slate-100 rounded-b-[2rem]">
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 if (!chatMessage.trim() || !user) return;
                 const text = chatMessage;
                 setChatMessage("");
-                await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
+                await fetch(`${API_BASE}/api/users/${user?.id || user?._id}/chats`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ text, sender: 'donor', hospitalId: selectedHospitalId })
                 });
-              }} className="flex gap-2 sm:gap-3 bg-slate-50 border border-slate-200 p-1.5 rounded-2xl relative shadow-inner">
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="bg-slate-200 hover:bg-slate-300 text-slate-600 w-12 flex items-center justify-center rounded-xl transition-all shadow-inner active:scale-95 text-xl cursor-pointer">
+              }} className="flex gap-2 bg-slate-50 border border-slate-100 p-1.5 rounded-2xl relative shadow-inner">
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="bg-slate-200 hover:bg-slate-300 text-slate-600 w-10 flex flex-col pt-0.5 items-center justify-center rounded-xl transition-all shadow-inner active:scale-95 text-lg cursor-pointer">
                   📷
                 </button>
                 <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={(e) => {
@@ -639,71 +642,21 @@ const DonorView = () => {
                   if (!file) return;
                   const reader = new FileReader();
                   reader.onload = async (event) => {
-                    await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
+                    await fetch(`${API_BASE}/api/users/${user?.id || user?._id}/chats`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ text: "📷 Hình ảnh từ rà soát", sender: 'donor', hospitalId: selectedHospitalId, image: event.target.result })
+                      body: JSON.stringify({ text: "📷 Hình ảnh rà soát", sender: 'donor', hospitalId: selectedHospitalId, image: event.target.result })
                     });
                   };
                   reader.readAsDataURL(file);
                 }} />
-                <input type="text" value={chatMessage} onChange={e => setChatMessage(e.target.value)} placeholder="Nhắn tin cho Bác sĩ..." className="flex-1 bg-transparent px-4 py-3 outline-none text-sm font-medium text-slate-700 placeholder:text-slate-400" />
-                <button type="submit" className="bg-slate-800 hover:bg-black active:scale-90 text-white p-3 px-6 rounded-xl font-black text-xs uppercase tracking-widest shadow-md transition-all">Gửi Lệnh</button>
+                <input type="text" value={chatMessage} onChange={e => setChatMessage(e.target.value)} placeholder="Nhắn tin..." className="flex-1 min-w-0 bg-transparent px-2 py-2 outline-none text-xs font-medium text-slate-700 placeholder:text-slate-400" />
+                <button type="submit" className="bg-slate-800 hover:bg-black active:scale-90 text-white p-2 px-3 rounded-xl font-bold text-lg shadow-md transition-all">✨</button>
               </form>
             </div>
           </div>
-
-          {/* GPS & RADAR CHECK */}
-          <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-black text-slate-700 text-sm flex items-center gap-2">
-                <span className="text-xl">📍</span> Tọa độ GPS
-              </h3>
-              {location || user.location ? (
-                <span className="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-widest flex items-center gap-1.5 border border-emerald-100"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> ONLINE</span>
-              ) : (
-                <span className="bg-slate-100 text-slate-500 text-[10px] px-2 py-1 rounded-md font-bold">OFFLINE</span>
-              )}
-            </div>
-
-            {(!location && !user.location) ? (
-              <div className="w-full rounded-2xl overflow-hidden shadow-inner relative h-40 bg-slate-50 border border-slate-200 flex flex-col items-center justify-center animate-pulse">
-                <span className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mb-2"></span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Đang kết nối vệ tinh...</span>
-              </div>
-            ) : (() => {
-              const lat = location?.lat || user.location?.lat;
-              const lng = location?.lng || user.location?.lng;
-              return (
-                <div className="w-full rounded-2xl overflow-hidden border-2 border-emerald-100/50 shadow-inner relative h-40 group">
-                  <iframe
-                    width="100%" height="100%" frameBorder="0" style={{ border: 0, filter: 'contrast(1.1) opacity(0.95)' }}
-                    src={`https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`}
-                  />
-                </div>
-              )
-            })()}
-
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <h3 className="font-black text-slate-700 text-sm flex items-center gap-2 mb-3">
-                <span className="text-xl">🔔</span> Nhận Tin Khẩn Cấp
-              </h3>
-              {user.fcmToken || fcmToken ? (
-                <div className="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold py-3 rounded-xl text-xs text-center flex items-center justify-center gap-2 shadow-sm">
-                  ACTIVE NOTIFICATION
-                </div>
-              ) : (
-                <button onClick={async () => {
-                  const token = await requestPermissionAndGetToken(user?.id || user?._id);
-                  if (token) setUser({ ...user, fcmToken: token });
-                }} className="w-full bg-slate-800 hover:bg-black text-white font-black py-3 rounded-xl shadow-md text-xs transition-all active:scale-95 flex items-center justify-center gap-2">
-                  CHO PHÉP NHẬN THÔNG BÁO
-                  <span className="bg-rose-500 px-1.5 rounded text-[9px] uppercase tracking-wider animate-pulse">Required</span>
-                </button>
-              )}
-            </div>
-          </div>
         </div>
+
 
         {/* CỘT PHẢI: TRẠNG THÁI VÀ CHAT LIVE (Col 8/12) */}
         <div className="lg:col-span-8 flex flex-col gap-6">
@@ -730,7 +683,7 @@ const DonorView = () => {
                     onClick={async () => {
                       try {
                         const val = user.donationCount || 0;
-                        await fetch('http://localhost:5000/api/users/sync', {
+                        await fetch(`${API_BASE}/api/users/sync`, {
                           method: 'POST', headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ ...user, donationCount: val, mockId: user.id || user._id })
                         });
@@ -752,7 +705,6 @@ const DonorView = () => {
 
           {/* BẢNG TIN KHẨN TOÀN KHU VỰC */}
 
-          {/* MESSAGE ROOM CHUYÊN NGHIỆP */}
           <div className="bg-rose-50 border-2 border-rose-200 rounded-3xl p-5 shadow-inner flex flex-col max-h-[40rem]">
             <h3 className="text-sm font-black text-rose-700 uppercase tracking-widest mb-3 flex items-center gap-2">
               <span className="text-lg">📢</span> BẢNG TIN BỆNH VIỆN
@@ -822,7 +774,7 @@ const DonorView = () => {
                                     supportType: 'Đăng ký Lịch hẹn',
                                     respondedAt: new Date().toISOString()
                                   };
-                                  await fetch(`http://localhost:5000/api/broadcasts/${b.id}/respond`, {
+                                  await fetch(`${API_BASE}/api/broadcasts/${b.id}/respond`, {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify(payload)
@@ -837,7 +789,7 @@ const DonorView = () => {
                             </button>
                             <button onClick={async () => {
                               const payload = { userId: user.id || user._id, status: 'Từ Chối', respondedAt: new Date().toISOString() };
-                              await fetch(`http://localhost:5000/api/broadcasts/${b.id}/respond`, {
+                              await fetch(`${API_BASE}/api/broadcasts/${b.id}/respond`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(payload)
@@ -882,8 +834,58 @@ const DonorView = () => {
               </div>
             )}
           </div>
-        </div>
 
+          {/* GPS & RADAR CHECK */}
+          <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-black text-slate-700 text-sm flex items-center gap-2">
+                <span className="text-xl">📍</span> Tọa độ GPS
+              </h3>
+              {location || user.location ? (
+                <span className="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-widest flex items-center gap-1.5 border border-emerald-100"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> ONLINE</span>
+              ) : (
+                <span className="bg-slate-100 text-slate-500 text-[10px] px-2 py-1 rounded-md font-bold">OFFLINE</span>
+              )}
+            </div>
+
+            {(!location && !user.location) ? (
+              <div className="w-full rounded-2xl overflow-hidden shadow-inner relative h-40 bg-slate-50 border border-slate-200 flex flex-col items-center justify-center animate-pulse">
+                <span className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mb-2"></span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Đang kết nối vệ tinh...</span>
+              </div>
+            ) : (() => {
+              const lat = location?.lat || user.location?.lat;
+              const lng = location?.lng || user.location?.lng;
+              return (
+                <div className="w-full rounded-2xl overflow-hidden border-2 border-emerald-100/50 shadow-inner relative h-40 group">
+                  <iframe
+                    width="100%" height="100%" frameBorder="0" style={{ border: 0, filter: 'contrast(1.1) opacity(0.95)' }}
+                    src={`https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`}
+                  />
+                </div>
+              )
+            })()}
+
+            <div className="mt-4 pt-4 border-t border-slate-100">
+              <h3 className="font-black text-slate-700 text-sm flex items-center gap-2 mb-3">
+                <span className="text-xl">🔔</span> Nhận Tin Khẩn Cấp
+              </h3>
+              {user.fcmToken || fcmToken ? (
+                <div className="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold py-3 rounded-xl text-xs text-center flex items-center justify-center gap-2 shadow-sm">
+                  ACTIVE NOTIFICATION
+                </div>
+              ) : (
+                <button onClick={async () => {
+                  const token = await requestPermissionAndGetToken(user?.id || user?._id);
+                  if (token) setUser({ ...user, fcmToken: token });
+                }} className="w-full bg-slate-800 hover:bg-black text-white font-black py-3 rounded-xl shadow-md text-xs transition-all active:scale-95 flex items-center justify-center gap-2">
+                  CHO PHÉP NHẬN THÔNG BÁO
+                  <span className="bg-rose-500 px-1.5 rounded text-[9px] uppercase tracking-wider animate-pulse">Required</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
