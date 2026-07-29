@@ -65,6 +65,7 @@ export const generateMockData = async () => {
                 email: 'mock' + i + '_' + Date.now() + '@random.com',
                 bloodType: randomBlood,
                 donationCount: Math.floor(Math.random() * 15),
+                isOnline: Math.random() > 0.5,
                 location: { lat, lng }
             })
         });
