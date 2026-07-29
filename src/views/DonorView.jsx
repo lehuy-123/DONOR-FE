@@ -132,8 +132,8 @@ const DonorView = () => {
 
     const missionUpdateListener = (payload) => {
       if (payload.userId === activeId) {
-          if (payload.isCompleted) setActiveMission(null);
-          else setActiveMission(payload);
+        if (payload.isCompleted) setActiveMission(null);
+        else setActiveMission(payload);
       }
     };
 
@@ -157,9 +157,9 @@ const DonorView = () => {
     fetch(`http://localhost:5000/api/emergency-missions?userId=${activeId}`)
       .then(res => res.json())
       .then(data => {
-         if (data.missions && data.missions.length > 0) {
-             setActiveMission(data.missions[0]);
-         }
+        if (data.missions && data.missions.length > 0) {
+          setActiveMission(data.missions[0]);
+        }
       })
       .catch(e => console.error(e));
   }, [user?.id]);
@@ -321,24 +321,7 @@ const DonorView = () => {
                       setActiveBroadcastForm(null);
                     } catch (e) { alert("Lỗi kết nối về trung tâm!"); }
                   }} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-4 rounded-xl shadow-lg shadow-rose-500/30 uppercase tracking-widest text-sm active:scale-95 transition-all text-center flex items-center justify-center gap-2">
-                    🏍️ TÔI SẼ ĐẾN NGAY CÙNG VỊ TRÍ
-                  </button>
-                  <button onClick={async () => {
-                    try {
-                      const payload = {
-                        userId: user.id || user._id, status: 'Đồng Ý', supportType: supportForm.type,
-                        helperName: user.name, helperPhone: user.phone, helperBloodType: user.bloodType,
-                        respondedAt: new Date().toISOString()
-                      };
-                      await fetch(`http://localhost:5000/api/broadcasts/${activeBroadcastForm.id}/respond`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                      });
-                      setBroadcasts(prev => prev.map(old => old.id === activeBroadcastForm.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
-                      setActiveBroadcastForm(null);
-                    } catch (e) { alert("Lỗi kết nối về trung tâm!"); }
-                  }} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl uppercase tracking-widest text-xs active:scale-95 transition-all">
-                    Chỉ Báo Danh Sẵn Sàng
+                    SẴN SÀNG ĐẾN
                   </button>
                 </div>
               ) : (
@@ -373,11 +356,11 @@ const DonorView = () => {
 
           <div className="bg-white max-w-lg w-full p-8 sm:p-10 rounded-[2rem] shadow-2xl relative z-10 flex flex-col items-center text-center animate-in zoom-in-50 duration-500 border border-red-100 overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 to-rose-500"></div>
-            
+
             <div className="w-20 h-20 bg-red-50 border border-red-100 text-red-600 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner animate-pulse">
               <span className="drop-shadow-md">⚠️</span>
             </div>
-            
+
             <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight mb-2">THÔNG BÁO KHẨN CẤP</h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 font-mono bg-slate-50 px-3 py-1 rounded-md">CODE RED - CẤP CỨU Huyết Học</p>
 
@@ -386,14 +369,14 @@ const DonorView = () => {
                 Trung tâm điều phối ghi nhận <span className="font-bold text-slate-900">{emergencyAlert.sender || "Tuyến Trên"}</span> đang phát đi lệnh báo động đỏ. Bệnh nhân đang trong tình trạng mất máu nguy kịch và cần truyền bổ sung khẩn cấp.
               </p>
               <div className="bg-white p-4 rounded-xl border border-red-50 flex items-center justify-between shadow-sm">
-                 <div>
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Nhóm máu chỉ định</p>
-                   <p className="font-black text-red-600 text-xl">{user?.bloodType}</p>
-                 </div>
-                 <div className="text-right">
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Mức độ ưu tiên</p>
-                   <p className="font-bold text-slate-800 text-sm">Tối đa (Cấp 1)</p>
-                 </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Nhóm máu chỉ định</p>
+                  <p className="font-black text-red-600 text-xl">{user?.bloodType}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Mức độ ưu tiên</p>
+                  <p className="font-bold text-slate-800 text-sm">Tối đa (Cấp 1)</p>
+                </div>
               </div>
               <p className="text-xs text-rose-600 font-medium mt-4 italic text-center">
                 * Vị trí của bạn được Radar nhận diện nằm trong "bán kính vàng" có thể ứng cứu kịp thời.
@@ -408,11 +391,11 @@ const DonorView = () => {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ hospitalId: emergencyAlert.hospitalId, hospitalName: emergencyAlert.sender, userId: user.id || user._id, user: { ...user, id: user.id || user._id }, status: 'ĐANG ĐẾN' })
                   });
-                } catch(e) {} finally { setLoading(false); setEmergencyAlert(null); }
+                } catch (e) { } finally { setLoading(false); setEmergencyAlert(null); }
               }} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 uppercase tracking-widest transition-all">
                 {loading ? 'Đang kích hoạt...' : 'TÔI SẴN SÀNG ĐẾN NGAY'}
               </button>
-              
+
               <button disabled={loading} onClick={async () => {
                 setLoading(true);
                 try {
@@ -420,11 +403,11 @@ const DonorView = () => {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ hospitalId: emergencyAlert.hospitalId, hospitalName: emergencyAlert.sender, userId: user.id || user._id, user: { ...user, id: user.id || user._id }, status: 'CHẤP NHẬN' })
                   });
-                } catch(e) {} finally { setLoading(false); setEmergencyAlert(null); }
+                } catch (e) { } finally { setLoading(false); setEmergencyAlert(null); }
               }} className="w-full bg-slate-800 hover:bg-black text-white font-black py-4 rounded-xl shadow-lg active:scale-95 uppercase tracking-widest transition-all">
                 {loading ? 'Đang kích hoạt...' : 'CHẤP NHẬN VÀ LIÊN HỆ'}
               </button>
-              
+
               <button onClick={() => {
                 setEmergencyAlert(null);
               }} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold py-4 rounded-xl active:scale-95 uppercase tracking-widest transition-all">
@@ -447,48 +430,46 @@ const DonorView = () => {
           Đăng Xuất
         </button>
       </div>
-      
+
       {/* KHU VỰC THỰC THI NHIỆM VỤ KHẨN CẤP */}
       {activeMission && (
         <div className="mb-8 bg-gradient-to-r from-red-600 to-rose-700 rounded-3xl p-6 shadow-xl shadow-red-500/20 text-white relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
-           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-20 translate-x-10"></div>
-           <h2 className="text-lg font-black uppercase tracking-widest mb-4 flex items-center gap-2"><span className="animate-pulse text-2xl">🚨</span> Nhiệm Vụ Điều Động Khẩn Cấp</h2>
-           
-           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-center">
-              <div className="flex-1 w-full">
-                 <p className="text-[10px] font-black text-red-200 uppercase tracking-widest mb-1">Mục Tiêu Di Chuyển</p>
-                 <p className="font-black text-2xl truncate drop-shadow-sm">{activeMission.hospitalName || "Bệnh Viện Tuyến Trên"}</p>
-                 <p className="text-sm text-red-100 mt-2 flex items-center gap-2">
-                   <span className="w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
-                   Trạng thái hiện tại: <span className="font-bold underline decoration-red-400 underline-offset-4">{activeMission.status}</span>
-                 </p>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                 <button disabled={activeMission.status !== 'ĐANG ĐẾN' && activeMission.status !== 'CHẤP NHẬN'} onClick={async () => {
-                    await fetch(`http://localhost:5000/api/emergency-missions/${activeMission.id}/status`, {
-                      method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ status: 'ĐÃ ĐẾN' })
-                    });
-                 }} className={`px-6 py-4 sm:py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${
-                    activeMission.status === 'ĐANG ĐẾN' || activeMission.status === 'CHẤP NHẬN' ? 'bg-white text-rose-600 hover:bg-slate-100 shadow-lg active:scale-95' :
-                    'bg-emerald-500 text-white border-2 border-emerald-400 opacity-80 cursor-not-allowed flex items-center gap-2'
-                 }`}>
-                    {activeMission.status === 'ĐANG ĐẾN' || activeMission.status === 'CHẤP NHẬN' ? 'Xác Nhận Đã Tới Viện' : '✔ Đã Tới Viện'}
-                 </button>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-20 translate-x-10"></div>
+          <h2 className="text-lg font-black uppercase tracking-widest mb-4 flex items-center gap-2"><span className="animate-pulse text-2xl">🚨</span> Nhiệm Vụ Điều Động Khẩn Cấp</h2>
 
-                 <button disabled={activeMission.status !== 'ĐÃ ĐẾN'} onClick={async () => {
-                    if(!window.confirm('Xác nhận bạn đã hoàn tất quy trình lấy máu tại Bệnh viện?')) return;
-                    await fetch(`http://localhost:5000/api/emergency-missions/${activeMission.id}/status`, {
-                      method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ status: 'ĐÃ HIẾN MÁU' })
-                    });
-                 }} className={`px-6 py-4 sm:py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${
-                    activeMission.status === 'ĐÃ ĐẾN' ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95' :
-                    'bg-white/10 text-white/50 border border-white/20 cursor-not-allowed'
-                 }`}>
-                    Hoàn Tất Hiến Máu
-                 </button>
-              </div>
-           </div>
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-center">
+            <div className="flex-1 w-full">
+              <p className="text-[10px] font-black text-red-200 uppercase tracking-widest mb-1">Mục Tiêu Di Chuyển</p>
+              <p className="font-black text-2xl truncate drop-shadow-sm">{activeMission.hospitalName || "Bệnh Viện Tuyến Trên"}</p>
+              <p className="text-sm text-red-100 mt-2 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
+                Trạng thái hiện tại: <span className="font-bold underline decoration-red-400 underline-offset-4">{activeMission.status}</span>
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <button disabled={activeMission.status !== 'ĐANG ĐẾN' && activeMission.status !== 'CHẤP NHẬN'} onClick={async () => {
+                await fetch(`http://localhost:5000/api/emergency-missions/${activeMission.id}/status`, {
+                  method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'ĐÃ ĐẾN' })
+                });
+              }} className={`px-6 py-4 sm:py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${activeMission.status === 'ĐANG ĐẾN' || activeMission.status === 'CHẤP NHẬN' ? 'bg-white text-rose-600 hover:bg-slate-100 shadow-lg active:scale-95' :
+                'bg-emerald-500 text-white border-2 border-emerald-400 opacity-80 cursor-not-allowed flex items-center gap-2'
+                }`}>
+                {activeMission.status === 'ĐANG ĐẾN' || activeMission.status === 'CHẤP NHẬN' ? 'Xác Nhận Đã Tới Viện' : '✔ Đã Tới Viện'}
+              </button>
+
+              <button disabled={activeMission.status !== 'ĐÃ ĐẾN'} onClick={async () => {
+                if (!window.confirm('Xác nhận bạn đã hoàn tất quy trình lấy máu tại Bệnh viện?')) return;
+                await fetch(`http://localhost:5000/api/emergency-missions/${activeMission.id}/status`, {
+                  method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'ĐÃ HIẾN MÁU' })
+                });
+              }} className={`px-6 py-4 sm:py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${activeMission.status === 'ĐÃ ĐẾN' ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95' :
+                'bg-white/10 text-white/50 border border-white/20 cursor-not-allowed'
+                }`}>
+                Hoàn Tất Hiến Máu
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -597,12 +578,12 @@ const DonorView = () => {
 
             {/* TAB CHUYỂN ĐỔI BẢNG TIN */}
             <div className="flex bg-white/60 p-1 rounded-xl mb-3 shadow-sm border border-rose-100 shrink-0">
-               <button onClick={() => setBulletinTab('daily')} className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${bulletinTab === 'daily' ? 'bg-white text-orange-600 shadow border border-orange-100' : 'text-slate-500 hover:bg-white/40'}`}>
-                 Trong Ngày
-               </button>
-               <button onClick={() => setBulletinTab('schedule')} className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${bulletinTab === 'schedule' ? 'bg-white text-blue-600 shadow border border-blue-100' : 'text-slate-500 hover:bg-white/40'}`}>
-                 Đặt Lịch Hẹn
-               </button>
+              <button onClick={() => setBulletinTab('daily')} className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${bulletinTab === 'daily' ? 'bg-white text-orange-600 shadow border border-orange-100' : 'text-slate-500 hover:bg-white/40'}`}>
+                Trong Ngày
+              </button>
+              <button onClick={() => setBulletinTab('schedule')} className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${bulletinTab === 'schedule' ? 'bg-white text-blue-600 shadow border border-blue-100' : 'text-slate-500 hover:bg-white/40'}`}>
+                Đăng Kí Hiến Máu
+              </button>
             </div>
 
             {broadcasts.length > 0 ? (
@@ -650,14 +631,14 @@ const DonorView = () => {
                             <button onClick={async () => {
                               if (isSchedule) {
                                 if (window.confirm('Xác nhận đăng ký lịch hẹn hiến máu này?')) {
-                                  const payload = { 
-                                    userId: user.id || user._id, 
+                                  const payload = {
+                                    userId: user.id || user._id,
                                     name: user.name,
                                     phone: user.phone,
                                     bloodType: user.bloodType,
-                                    status: 'Đồng Ý', 
+                                    status: 'Đồng Ý',
                                     supportType: 'Đăng ký Lịch hẹn',
-                                    respondedAt: new Date().toISOString() 
+                                    respondedAt: new Date().toISOString()
                                   };
                                   await fetch(`http://localhost:5000/api/broadcasts/${b.id}/respond`, {
                                     method: 'POST',
@@ -819,7 +800,7 @@ const DonorView = () => {
 
           {/* BẢNG TIN KHẨN TOÀN KHU VỰC */}
 
-                    {/* MESSAGE ROOM CHUYÊN NGHIỆP */}
+          {/* MESSAGE ROOM CHUYÊN NGHIỆP */}
           <div id="chat-room-section" className="bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col flex-1 min-h-[450px]">
             <div className="px-4 sm:px-8 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
@@ -835,7 +816,7 @@ const DonorView = () => {
                   </p>
                 </div>
               </div>
-              
+
               <button onClick={async () => {
                 await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
                   method: 'POST', headers: { 'Content-Type': 'application/json' },
