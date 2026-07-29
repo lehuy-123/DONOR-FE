@@ -27,6 +27,8 @@ const DonorView = () => {
   const [emergencyAlert, setEmergencyAlert] = useState(null);
   const [activeBroadcastForm, setActiveBroadcastForm] = useState(null);
   const [supportForm, setSupportForm] = useState({ type: 'Cá nhân hỗ trợ', helperName: '', helperPhone: '', helperBloodType: 'O+' });
+  const [broadcastPage, setBroadcastPage] = useState(1);
+  const broadcastsPerPage = 10;
 
   useEffect(() => {
     const savedMe = localStorage.getItem('me_donor');
@@ -479,22 +481,22 @@ const DonorView = () => {
             </h3>
             
             {broadcasts.length > 0 ? (
-              <div className="space-y-3">
-                {broadcasts.map(b => {
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-1 custom-scrollbar">
+                {broadcasts.slice((broadcastPage - 1) * broadcastsPerPage, broadcastPage * broadcastsPerPage).map(b => {
                   const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
                   return (
-                    <div key={b.id} className="bg-white rounded-2xl p-4 shadow-sm border border-rose-100 flex flex-col gap-3">
+                    <div key={b.id} className="bg-white rounded-2xl p-3 shadow-sm border border-rose-100 flex flex-col gap-2">
                       <div>
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-500 mb-1">
-                          <span className="bg-rose-600 text-white px-2 py-0.5 rounded uppercase">{b.hospitalName}</span>
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 mb-1">
+                          <span className="bg-rose-600 text-white px-1.5 py-0.5 rounded text-[10px] uppercase">{b.hospitalName}</span>
                           Cần nhóm máu: <span className="text-rose-600">[{b.bloodTypes.join(', ')}]</span>
                         </div>
-                        <p className="text-sm font-medium text-slate-700">{b.message}</p>
+                        <p className="text-xs font-medium text-slate-700 leading-relaxed">{b.message}</p>
                       </div>
 
                       {!responded ? (
-                        <div className="flex gap-2">
-                          <button onClick={() => setActiveBroadcastForm(b)} className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black py-2 rounded-xl active:scale-95 transition-all">SẴN SÀNG HỖ TRỢ</button>
+                        <div className="flex gap-2 mt-1">
+                          <button onClick={() => setActiveBroadcastForm(b)} className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-black py-1.5 rounded-lg active:scale-95 transition-all">SẴN SÀNG HỖ TRỢ</button>
                           <button onClick={async () => {
                             await fetch(`https://donor-be.onrender.com/api/broadcasts/${b.id}/respond`, {
                               method: 'POST',
@@ -502,16 +504,24 @@ const DonorView = () => {
                               body: JSON.stringify({ userId: user.id || user._id, status: 'Từ Chối' })
                             });
                             setBroadcasts(prev => prev.map(old => old.id === b.id ? { ...old, responders: [...(old.responders || []), { userId: user.id || user._id, status: 'Từ Chối' }] } : old));
-                          }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs font-bold px-4 py-2 rounded-xl active:scale-95 transition-all">TỪ CHỐI</button>
+                          }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all">TỪ CHỐI</button>
                         </div>
                       ) : (
-                        <div className={`text-xs font-bold px-3 py-2 rounded-lg text-center ${responded.status === 'Đồng Ý' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
-                          {responded.status === 'Đồng Ý' ? '✅ BẠN ĐÃ ĐĂNG KÝ HỖ TRỢ CHIẾN DỊCH NÀY' : '❌ ĐÃ TỪ CHỐI'}
+                        <div className={`text-[11px] mt-1 font-bold px-2 py-1.5 rounded-md text-center ${responded.status === 'Đồng Ý' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
+                          {responded.status === 'Đồng Ý' ? '✅ ĐÃ ĐĂNG KÝ HỖ TRỢ' : '❌ ĐÃ TỪ CHỐI'}
                         </div>
                       )}
                     </div>
                   );
                 })}
+                
+                {Math.ceil(broadcasts.length / broadcastsPerPage) > 1 && (
+                  <div className="flex justify-between items-center pt-2">
+                     <button disabled={broadcastPage === 1} onClick={() => setBroadcastPage(prev => Math.max(1, prev - 1))} className="px-3 py-1 rounded bg-white border border-rose-200 text-rose-600 disabled:opacity-50 text-xs font-bold shadow-sm">Trước</button>
+                     <span className="text-xs font-bold text-rose-500">{broadcastPage} / {Math.ceil(broadcasts.length / broadcastsPerPage)}</span>
+                     <button disabled={broadcastPage === Math.ceil(broadcasts.length / broadcastsPerPage)} onClick={() => setBroadcastPage(prev => Math.min(Math.ceil(broadcasts.length / broadcastsPerPage), prev + 1))} className="px-3 py-1 rounded bg-white border border-rose-200 text-rose-600 disabled:opacity-50 text-xs font-bold shadow-sm">Sau</button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="border-2 border-dashed border-rose-200/50 bg-white/50 rounded-2xl p-6 text-center shadow-inner">
