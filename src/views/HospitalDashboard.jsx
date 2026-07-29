@@ -8,7 +8,7 @@ const socket = io("https://donor-be.onrender.com");
 const HOSPITALS = [
   { id: 'choray', name: 'Bệnh Viện Chợ Rẫy', lat: 10.7583, lng: 106.6570, color: 'from-blue-700 to-blue-900' },
   { id: 'nd115', name: 'Nhân Dân 115', lat: 10.7758, lng: 106.6666, color: 'from-emerald-700 to-emerald-900' },
-  { id: 'giadinh', name: 'Nhân Dân Gia Định', lat: 10.8062, lng: 106.6917, color: 'from-rose-800 to-rose-900' }
+  { id: 'giadinh', name: 'Nhân Dân Gia Định', lat: 10.8062, lng: 106.6917, color: 'from-rose-800 to-rose-900', avatar: '/bvgiadinh.jpg' }
 ];
 
 const HospitalDashboard = () => {
@@ -30,7 +30,7 @@ const HospitalDashboard = () => {
   const [broadcastTarget, setBroadcastTarget] = useState("ALL");
   const [broadcasts, setBroadcasts] = useState([]);
   const [selectedResponder, setSelectedResponder] = useState(null);
-  
+
   useEffect(() => {
     fetch(`https://donor-be.onrender.com/api/broadcasts`)
       .then(res => res.json())
@@ -38,7 +38,7 @@ const HospitalDashboard = () => {
       .catch(e => console.error(e));
 
     socket.on('broadcast-update', (updated) => {
-        setBroadcasts(prev => prev.map(b => b.id === updated.id ? { ...b, responders: updated.responders } : b));
+      setBroadcasts(prev => prev.map(b => b.id === updated.id ? { ...b, responders: updated.responders } : b));
     });
     return () => socket.off('broadcast-update');
   }, [hospitalUser]);
@@ -46,26 +46,26 @@ const HospitalDashboard = () => {
   const handleBroadcast = async () => {
     if (!broadcastMsg.trim()) return alert("Vui lòng nhập nội dung phát khẩn!");
     const bloodTypes = broadcastTarget === 'ALL' ? ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] : [broadcastTarget];
-    
-    if(!window.confirm(`Xác nhận phát bảng tin khẩn cấp tới TOÀN LÃNH THỔ cho nhóm máu: ${broadcastTarget}?`)) return;
+
+    if (!window.confirm(`Xác nhận phát bảng tin khẩn cấp tới TOÀN LÃNH THỔ cho nhóm máu: ${broadcastTarget}?`)) return;
 
     try {
-        const res = await fetch(`https://donor-be.onrender.com/api/broadcasts`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                hospitalId: hospitalUser.id,
-                hospitalName: hospitalUser.name,
-                bloodTypes, message: broadcastMsg 
-            })
-        });
-        const data = await res.json();
-        if (data.success) {
-            setBroadcasts([data.broadcast, ...broadcasts]);
-            setBroadcastMsg("");
-            alert("Đã kết nối và phát lệnh Toàn Tuyến thành công!");
-        }
-    } catch(e) { alert("Lỗi khi phát lệnh khẩn cấp!") }
+      const res = await fetch(`https://donor-be.onrender.com/api/broadcasts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hospitalId: hospitalUser.id,
+          hospitalName: hospitalUser.name,
+          bloodTypes, message: broadcastMsg
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBroadcasts([data.broadcast, ...broadcasts]);
+        setBroadcastMsg("");
+        alert("Đã kết nối và phát lệnh Toàn Tuyến thành công!");
+      }
+    } catch (e) { alert("Lỗi khi phát lệnh khẩn cấp!") }
   };
 
   const DEFAULT_INVENTORY = {
@@ -155,24 +155,24 @@ const HospitalDashboard = () => {
   // Lắng nghe toàn bộ users để gom Hộp Thư
   // Lấy dữ liệu 1 lần lúc vào trang (API cần quét toàn bộ user để lấy history, trong dự án thật sẽ có 1 api /inbox riêng)
   const fetchInbox = async () => {
-     if(!hospitalUser) return;
-     try {
-       const res = await fetch(`https://donor-be.onrender.com/api/users/scan?bloodType=all`);
-       const data = await res.json();
-       const usersWithChats = [];
-       (data.donors || []).forEach(userData => {
-          if (userData.chats && userData.chats.some(m => m.hospitalId === hospitalUser.id)) {
-            usersWithChats.push(userData);
-          }
-       });
-       usersWithChats.sort((a, b) => {
-          const lastA = a.chats.filter(m => m.hospitalId === hospitalUser.id).pop();
-          const lastB = b.chats.filter(m => m.hospitalId === hospitalUser.id).pop();
-          if(!lastA) return 1; if(!lastB) return -1;
-          return new Date(lastB.time) - new Date(lastA.time);
-       });
-       setInboxUsers(usersWithChats);
-     } catch(e) {}
+    if (!hospitalUser) return;
+    try {
+      const res = await fetch(`https://donor-be.onrender.com/api/users/scan?bloodType=all`);
+      const data = await res.json();
+      const usersWithChats = [];
+      (data.donors || []).forEach(userData => {
+        if (userData.chats && userData.chats.some(m => m.hospitalId === hospitalUser.id)) {
+          usersWithChats.push(userData);
+        }
+      });
+      usersWithChats.sort((a, b) => {
+        const lastA = a.chats.filter(m => m.hospitalId === hospitalUser.id).pop();
+        const lastB = b.chats.filter(m => m.hospitalId === hospitalUser.id).pop();
+        if (!lastA) return 1; if (!lastB) return -1;
+        return new Date(lastB.time) - new Date(lastA.time);
+      });
+      setInboxUsers(usersWithChats);
+    } catch (e) { }
   };
 
   useEffect(() => {
@@ -182,16 +182,16 @@ const HospitalDashboard = () => {
   // Lắng nghe tin nhắn Socket.io
   useEffect(() => {
     if (!hospitalUser) return;
-    
+
     socket.emit('join-hospital', hospitalUser.id);
-    
+
     const messageListener = ({ userId, msg }) => {
-        // Cập nhật messages nếu đang chat với userId này
-        if (selectedDonor && selectedDonor.id === userId) {
-            setMessages(prev => [...prev, msg]);
-        }
-        // Cập nhật lại inbox (Reload nôm na cho nhanh)
-        fetchInbox();
+      // Cập nhật messages nếu đang chat với userId này
+      if (selectedDonor && selectedDonor.id === userId) {
+        setMessages(prev => [...prev, msg]);
+      }
+      // Cập nhật lại inbox (Reload nôm na cho nhanh)
+      fetchInbox();
     };
 
     socket.on('receive-message', messageListener);
@@ -200,26 +200,26 @@ const HospitalDashboard = () => {
 
   // Nạp lịch sử từ Backend mỗi khi mở Profile Modal
   useEffect(() => {
-     if (!selectedDonor) return;
-     fetch(`https://donor-be.onrender.com/api/users/${selectedDonor.id}/chats`)
-        .then(res => res.json())
-        .then(data => setMessages(data.chats || []))
-        .catch(e => console.error(e));
-        
-     // Phân tích ngược tọa độ thành địa chỉ thật
-     if (selectedDonor.location) {
-        setDonorAddress("Đang phân tích định vị không gian...");
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${selectedDonor.location.lat}&lon=${selectedDonor.location.lng}`)
-           .then(r => r.json())
-           .then(data => {
-               if(data && data.display_name) {
-                  setDonorAddress(data.display_name);
-               } else {
-                  setDonorAddress(`${selectedDonor.location.lat}, ${selectedDonor.location.lng}`);
-               }
-           })
-           .catch(() => setDonorAddress(`${selectedDonor.location.lat}, ${selectedDonor.location.lng}`));
-     }
+    if (!selectedDonor) return;
+    fetch(`https://donor-be.onrender.com/api/users/${selectedDonor.id}/chats`)
+      .then(res => res.json())
+      .then(data => setMessages(data.chats || []))
+      .catch(e => console.error(e));
+
+    // Phân tích ngược tọa độ thành địa chỉ thật
+    if (selectedDonor.location) {
+      setDonorAddress("Đang phân tích định vị không gian...");
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${selectedDonor.location.lat}&lon=${selectedDonor.location.lng}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.display_name) {
+            setDonorAddress(data.display_name);
+          } else {
+            setDonorAddress(`${selectedDonor.location.lat}, ${selectedDonor.location.lng}`);
+          }
+        })
+        .catch(() => setDonorAddress(`${selectedDonor.location.lat}, ${selectedDonor.location.lng}`));
+    }
   }, [selectedDonor]);
 
   const handleGenerateMock = async () => {
@@ -266,9 +266,9 @@ const HospitalDashboard = () => {
     const text = chatMessage;
     setChatMessage("");
     await fetch(`https://donor-be.onrender.com/api/users/${selectedDonor.id}/chats`, {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ text, sender: hospitalUser.name, hospitalId: hospitalUser.id })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, sender: hospitalUser.name, hospitalId: hospitalUser.id })
     });
   };
 
@@ -278,35 +278,35 @@ const HospitalDashboard = () => {
     const reader = new FileReader();
     reader.onload = async (event) => {
       await fetch(`https://donor-be.onrender.com/api/users/${selectedDonor.id}/chats`, {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ text: "📷 Hình ảnh Y khoa đính kèm", sender: hospitalUser.name, hospitalId: hospitalUser.id, image: event.target.result })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: "📷 Hình ảnh Y khoa đính kèm", sender: hospitalUser.name, hospitalId: hospitalUser.id, image: event.target.result })
       });
     };
     reader.readAsDataURL(file);
   };
 
   const handleSendPush = async (donor) => {
-    if(!donor.pushSubscription) {
-       alert("Người dùng chưa cấp quyền Push Notification qua Node Push!");
-       return;
+    if (!donor.pushSubscription) {
+      alert("Người dùng chưa cấp quyền Push Notification qua Node Push!");
+      return;
     }
-    if(!window.confirm(`Phát lệnh báo động khẩn cấp tới thiết bị của ${donor.name}?`)) return;
-    
+    if (!window.confirm(`Phát lệnh báo động khẩn cấp tới thiết bị của ${donor.name}?`)) return;
+
     try {
       const res = await fetch("https://donor-be.onrender.com/api/emergency/push", {
-         method: "POST",
-         headers: { "Content-Type": "application/json" },
-         body: JSON.stringify({
-            userId: donor.id,
-            bloodType: donor.bloodType,
-            hospitalName: hospitalUser.name,
-            hospitalId: hospitalUser.id
-         })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: donor.id,
+          bloodType: donor.bloodType,
+          hospitalName: hospitalUser.name,
+          hospitalId: hospitalUser.id
+        })
       });
       const data = await res.json();
       if (data.success) {
-         alert("Đã bắn Lệnh Khẩn Cấp Bằng Node.js Web-Push!");
+        alert("Đã bắn Lệnh Khẩn Cấp Bằng Node.js Web-Push!");
       }
     } catch (e) {
       alert("Đã xảy ra lỗi khi gửi API.");
@@ -315,28 +315,28 @@ const HospitalDashboard = () => {
 
   const handleCallAll = async () => {
     const pushableDonors = processedDonors.filter(d => d.pushSubscription);
-    if(pushableDonors.length === 0) {
+    if (pushableDonors.length === 0) {
       alert("Không có vệ tinh nào trong danh sách hiện tại đã cấp quyền Push Notification!");
       return;
     }
-    
-    if(!window.confirm(`Phát lệnh báo động đồng loạt tới ${pushableDonors.length} vệ tinh? Động thái này sẽ làm rung thiết bị của họ!`)) return;
+
+    if (!window.confirm(`Phát lệnh báo động đồng loạt tới ${pushableDonors.length} vệ tinh? Động thái này sẽ làm rung thiết bị của họ!`)) return;
 
     try {
-      await Promise.all(pushableDonors.map(donor => 
+      await Promise.all(pushableDonors.map(donor =>
         fetch("https://donor-be.onrender.com/api/emergency/push", {
-           method: "POST",
-           headers: { "Content-Type": "application/json" },
-           body: JSON.stringify({
-              userId: donor.id,
-              bloodType: donor.bloodType,
-              hospitalName: hospitalUser.name,
-              hospitalId: hospitalUser.id
-           })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: donor.id,
+            bloodType: donor.bloodType,
+            hospitalName: hospitalUser.name,
+            hospitalId: hospitalUser.id
+          })
         })
       ));
       alert(`🔔 Đã hoàn tất phủ sóng tin nhắn khẩn cấp tới ${pushableDonors.length} vệ tinh!`);
-    } catch(e) {
+    } catch (e) {
       alert("Đã xảy ra lỗi khi gửi thư tín hàng loạt.");
     }
   };
@@ -424,7 +424,11 @@ const HospitalDashboard = () => {
             <div>
               <div className="flex justify-between items-start mb-6">
                 <h2 className="text-2xl font-black bg-clip-text flex items-center gap-4">
-                  <span className="text-4xl shadow-2xl rounded-2xl bg-white/10 p-3 backdrop-blur-sm border border-white/20">🏥</span>
+                  {hospitalUser.avatar ? (
+                    <img src={hospitalUser.avatar} alt="Avatar" className="w-16 h-16 object-cover shadow-2xl rounded-2xl bg-white/10 p-1 backdrop-blur-sm border border-white/20" />
+                  ) : (
+                    <span className="text-4xl shadow-2xl rounded-2xl bg-white/10 p-3 backdrop-blur-sm border border-white/20">🏥</span>
+                  )}
                   <div>
                     {hospitalUser.name}
                     <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-300 mt-1.5 flex items-center gap-2">
@@ -454,10 +458,10 @@ const HospitalDashboard = () => {
 
             <div className="flex gap-3">
               <button onClick={handleGenerateMock} disabled={generating} className="bg-black/20 hover:bg-black/40 text-white/90 active:scale-95 text-[10px] font-bold px-4 py-3 rounded-xl transition-all shadow-inner border border-white/10 text-center uppercase tracking-widest">
-                {generating ? 'Đang tạo...' : '💉 Giả Lập Data'}
+                {generating ? 'Đang tạo...' : 'Chon'}
               </button>
               <button onClick={() => { setHospitalUser(null); setScanned(false); setDonors([]); }} className="bg-white text-rose-600 hover:bg-rose-50 font-black px-6 py-3 rounded-xl text-sm transition-all shadow-xl flex-1 border-b-4 border-slate-200 uppercase tracking-widest flex items-center justify-center gap-2">
-                Đăng Xuất Cơ Sở <span className="text-lg leading-none">🚪</span>
+                Đăng Xuất Tài Khoản Bệnh Viện <span className="text-lg leading-none"></span>
               </button>
             </div>
           </div>
@@ -491,135 +495,135 @@ const HospitalDashboard = () => {
 
           {/* BROADCAST KHẨN CẤP */}
           <div className="bg-gradient-to-br from-rose-500 to-rose-700 p-6 rounded-3xl shadow-xl shadow-rose-500/20 border border-rose-400 relative overflow-hidden isolate">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-2xl rounded-full"></div>
-             <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-4">
-               <span className="w-2 h-2 rounded-full bg-white animate-ping"></span> Mạng Lưới Khẩn Cấp Toàn Lãnh Thổ
-             </h3>
-             <div className="space-y-3 relative z-10">
-               <div className="flex gap-2">
-                 <select value={broadcastTarget} onChange={e => setBroadcastTarget(e.target.value)} className="bg-white/20 text-white font-bold text-xs p-3 rounded-xl border border-white/30 outline-none w-1/3">
-                    <option value="ALL" className="text-slate-800">CẦN TẤT CẢ (ALL)</option>
-                    <option value="O+" className="text-slate-800">Chỉ mảng: O+</option>
-                    <option value="O-" className="text-slate-800">Chỉ mảng: O-</option>
-                    <option value="A+" className="text-slate-800">Chỉ mảng: A+</option>
-                    <option value="A-" className="text-slate-800">Chỉ mảng: A-</option>
-                    <option value="B+" className="text-slate-800">Chỉ mảng: B+</option>
-                    <option value="B-" className="text-slate-800">Chỉ mảng: B-</option>
-                    <option value="AB+" className="text-slate-800">Chỉ mảng: AB+</option>
-                    <option value="AB-" className="text-slate-800">Chỉ mảng: AB-</option>
-                 </select>
-                 <input type="text" value={broadcastMsg} onChange={e => setBroadcastMsg(e.target.value)} placeholder="Nhập tóm tắt tình trạng khẩn cấp..." className="w-2/3 bg-white/20 border border-white/30 p-3 rounded-xl text-white placeholder-white/60 font-medium text-sm focus:outline-none focus:bg-white/30 transition-all" />
-               </div>
-               <button onClick={handleBroadcast} className="w-full bg-white text-rose-600 hover:bg-rose-50 font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-xs transition-all active:scale-95 flex justify-center items-center gap-2">
-                  <span className="text-xl">📡</span> BẮN TÍN HIỆU CẦU CỨU
-               </button>
-             </div>
-             
-             {/* Danh sách người tiếp nhận Broadcast */}
-             {broadcasts.length > 0 && (
-               <div className="mt-6 border-t border-white/20 pt-4 space-y-2">
-                 <p className="text-[10px] uppercase font-bold text-white/50 tracking-widest">Đội Ứng Cứu Đã Phản Hồi ({broadcasts[0].responders?.length || 0})</p>
-                 <div className="max-h-40 overflow-y-auto space-y-2 pr-2">
-                   {broadcasts[0].responders?.map((r, i) => (
-                      <button key={i} onClick={() => r.status === 'Đồng Ý' && setSelectedResponder(r)} className={`w-full text-left bg-white p-2.5 rounded-xl flex items-center justify-between text-xs hover:bg-slate-50 transition-colors ${r.status !== 'Đồng Ý' && 'cursor-default'}`}>
-                         <div className="font-bold text-slate-700 flex gap-2 w-full truncate"><span className="text-rose-600">[{r.bloodType}]</span> {r.name}</div>
-                         {r.status === 'Đồng Ý' ? (
-                           <span className="bg-emerald-100 text-emerald-600 font-bold px-2 py-1 rounded-md ml-2 shrink-0">✅ Xem Chi Tiết</span>
-                         ) : (
-                           <span className="bg-slate-100 text-slate-500 font-bold px-2 py-1 rounded-md ml-2 shrink-0">❌ Từ chối</span>
-                         )}
-                      </button>
-                   ))}
-                 </div>
-               </div>
-             )}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-2xl rounded-full"></div>
+            <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-4">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span> Mạng Lưới Khẩn Cấp Toàn Lãnh Thổ
+            </h3>
+            <div className="space-y-3 relative z-10">
+              <div className="flex gap-2">
+                <select value={broadcastTarget} onChange={e => setBroadcastTarget(e.target.value)} className="bg-white/20 text-white font-bold text-xs p-3 rounded-xl border border-white/30 outline-none w-1/3">
+                  <option value="ALL" className="text-slate-800">CẦN TẤT CẢ (ALL)</option>
+                  <option value="O+" className="text-slate-800">Chỉ mảng: O+</option>
+                  <option value="O-" className="text-slate-800">Chỉ mảng: O-</option>
+                  <option value="A+" className="text-slate-800">Chỉ mảng: A+</option>
+                  <option value="A-" className="text-slate-800">Chỉ mảng: A-</option>
+                  <option value="B+" className="text-slate-800">Chỉ mảng: B+</option>
+                  <option value="B-" className="text-slate-800">Chỉ mảng: B-</option>
+                  <option value="AB+" className="text-slate-800">Chỉ mảng: AB+</option>
+                  <option value="AB-" className="text-slate-800">Chỉ mảng: AB-</option>
+                </select>
+                <input type="text" value={broadcastMsg} onChange={e => setBroadcastMsg(e.target.value)} placeholder="Nhập tóm tắt tình trạng khẩn cấp..." className="w-2/3 bg-white/20 border border-white/30 p-3 rounded-xl text-white placeholder-white/60 font-medium text-sm focus:outline-none focus:bg-white/30 transition-all" />
+              </div>
+              <button onClick={handleBroadcast} className="w-full bg-white text-rose-600 hover:bg-rose-50 font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-xs transition-all active:scale-95 flex justify-center items-center gap-2">
+                <span className="text-xl">📡</span> BẮN TÍN HIỆU CẦU CỨU
+              </button>
+            </div>
+
+            {/* Danh sách người tiếp nhận Broadcast */}
+            {broadcasts.length > 0 && (
+              <div className="mt-6 border-t border-white/20 pt-4 space-y-2">
+                <p className="text-[10px] uppercase font-bold text-white/50 tracking-widest">Đội Ứng Cứu Đã Phản Hồi ({broadcasts[0].responders?.length || 0})</p>
+                <div className="max-h-40 overflow-y-auto space-y-2 pr-2">
+                  {broadcasts[0].responders?.map((r, i) => (
+                    <button key={i} onClick={() => r.status === 'Đồng Ý' && setSelectedResponder(r)} className={`w-full text-left bg-white p-2.5 rounded-xl flex items-center justify-between text-xs hover:bg-slate-50 transition-colors ${r.status !== 'Đồng Ý' && 'cursor-default'}`}>
+                      <div className="font-bold text-slate-700 flex gap-2 w-full truncate"><span className="text-rose-600">[{r.bloodType}]</span> {r.name}</div>
+                      {r.status === 'Đồng Ý' ? (
+                        <span className="bg-emerald-100 text-emerald-600 font-bold px-2 py-1 rounded-md ml-2 shrink-0">✅ Xem Chi Tiết</span>
+                      ) : (
+                        <span className="bg-slate-100 text-slate-500 font-bold px-2 py-1 rounded-md ml-2 shrink-0">❌ Từ chối</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-          
+
           {/* MODAL CHI TIẾT RESPONDER FORM */}
           {selectedResponder && (
-             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-                <div className="bg-white max-w-sm w-full rounded-[2rem] p-6 shadow-2xl relative animate-in zoom-in-95 duration-300 max-h-[95vh] overflow-y-auto hide-scrollbar">
-                  <button onClick={() => setSelectedResponder(null)} className="absolute top-4 right-4 w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-rose-100 hover:text-rose-600 transition-colors">✕</button>
-                  <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mb-4 shadow-inner">
-                    📋
-                  </div>
-                  <h3 className="text-xl font-black text-slate-800 mb-1">Chi Tiết Viện Trợ</h3>
-                  <p className="text-xs font-bold text-emerald-600 mb-6 uppercase tracking-widest">{selectedResponder.supportType || 'Cá nhân hỗ trợ'}</p>
-                  
-                  {(() => {
-                     let etaInfo = null;
-                     if (selectedResponder.helperLat && selectedResponder.helperLng && hospitalUser?.lat && hospitalUser?.lng) {
-                        const r = 6371; const p = Math.PI / 180;
-                        const a = 0.5 - Math.cos((selectedResponder.helperLat - hospitalUser.lat) * p)/2 + 
-                                  Math.cos(hospitalUser.lat * p) * Math.cos(selectedResponder.helperLat * p) * 
-                                  (1 - Math.cos((selectedResponder.helperLng - hospitalUser.lng) * p))/2;
-                        const km = (2 * r * Math.asin(Math.sqrt(a))).toFixed(1);
-                        etaInfo = { km, time: Math.ceil(km * 2) };
-                     }
-                     return (
-                        <div className="space-y-4">
-                           {etaInfo && (
-                              <>
-                                 <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-2xl flex items-center justify-between shadow-lg shadow-blue-500/30">
-                                    <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-1">Đang Di Chuyển</p>
-                                        <p className="text-xl font-black">{etaInfo.time} <span className="text-sm font-medium">phút</span></p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-1">Khoảng Cách</p>
-                                        <p className="text-lg font-bold">{etaInfo.km} <span className="text-xs font-medium">KM</span></p>
-                                    </div>
-                                 </div>
-                                 <div className="w-full h-32 rounded-2xl overflow-hidden border border-slate-200 shadow-inner relative isolate pointer-events-none">
-                                    <iframe width="100%" height="100%" frameBorder="0" style={{ border: 0, filter: 'contrast(1.2)' }} src={`https://maps.google.com/maps?q=${selectedResponder.helperLat},${selectedResponder.helperLng}&z=15&output=embed`} />
-                                 </div>
-                              </>
-                           )}
-                           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+              <div className="bg-white max-w-sm w-full rounded-[2rem] p-6 shadow-2xl relative animate-in zoom-in-95 duration-300 max-h-[95vh] overflow-y-auto hide-scrollbar">
+                <button onClick={() => setSelectedResponder(null)} className="absolute top-4 right-4 w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-rose-100 hover:text-rose-600 transition-colors">✕</button>
+                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mb-4 shadow-inner">
+                  📋
+                </div>
+                <h3 className="text-xl font-black text-slate-800 mb-1">Chi Tiết Viện Trợ</h3>
+                <p className="text-xs font-bold text-emerald-600 mb-6 uppercase tracking-widest">{selectedResponder.supportType || 'Cá nhân hỗ trợ'}</p>
+
+                {(() => {
+                  let etaInfo = null;
+                  if (selectedResponder.helperLat && selectedResponder.helperLng && hospitalUser?.lat && hospitalUser?.lng) {
+                    const r = 6371; const p = Math.PI / 180;
+                    const a = 0.5 - Math.cos((selectedResponder.helperLat - hospitalUser.lat) * p) / 2 +
+                      Math.cos(hospitalUser.lat * p) * Math.cos(selectedResponder.helperLat * p) *
+                      (1 - Math.cos((selectedResponder.helperLng - hospitalUser.lng) * p)) / 2;
+                    const km = (2 * r * Math.asin(Math.sqrt(a))).toFixed(1);
+                    etaInfo = { km, time: Math.ceil(km * 2) };
+                  }
+                  return (
+                    <div className="space-y-4">
+                      {etaInfo && (
+                        <>
+                          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-2xl flex items-center justify-between shadow-lg shadow-blue-500/30">
+                            <div>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-1">Đang Di Chuyển</p>
+                              <p className="text-xl font-black">{etaInfo.time} <span className="text-sm font-medium">phút</span></p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-1">Khoảng Cách</p>
+                              <p className="text-lg font-bold">{etaInfo.km} <span className="text-xs font-medium">KM</span></p>
+                            </div>
+                          </div>
+                          <div className="w-full h-32 rounded-2xl overflow-hidden border border-slate-200 shadow-inner relative isolate pointer-events-none">
+                            <iframe width="100%" height="100%" frameBorder="0" style={{ border: 0, filter: 'contrast(1.2)' }} src={`https://maps.google.com/maps?q=${selectedResponder.helperLat},${selectedResponder.helperLng}&z=15&output=embed`} />
+                          </div>
+                        </>
+                      )}
+                      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Người Xuất Phát Đi</p>
                         <p className="text-sm font-bold text-slate-800">{selectedResponder.helperName || selectedResponder.name}</p>
-                     </div>
-                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center">
+                      </div>
+                      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center">
                         <div>
-                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Liên Lạc</p>
-                           <p className="text-sm font-bold text-slate-800">{selectedResponder.helperPhone || selectedResponder.phone}</p>
+                          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Liên Lạc</p>
+                          <p className="text-sm font-bold text-slate-800">{selectedResponder.helperPhone || selectedResponder.phone}</p>
                         </div>
                         <a href={`tel:${selectedResponder.helperPhone || selectedResponder.phone}`} className="w-10 h-10 bg-emerald-500 text-white rounded-xl shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all">📞</a>
-                     </div>
-                     <div className="bg-rose-50 text-rose-700 p-4 rounded-2xl border border-rose-100 flex items-center justify-between">
-                         <p className="text-[10px] font-black uppercase tracking-widest">Loại Máu</p>
-                         <p className="text-2xl font-black">{selectedResponder.helperBloodType || selectedResponder.bloodType}</p>
                       </div>
-                   </div>
+                      <div className="bg-rose-50 text-rose-700 p-4 rounded-2xl border border-rose-100 flex items-center justify-between">
+                        <p className="text-[10px] font-black uppercase tracking-widest">Loại Máu</p>
+                        <p className="text-2xl font-black">{selectedResponder.helperBloodType || selectedResponder.bloodType}</p>
+                      </div>
+                    </div>
                   )
-                  })()}
-                  
-                  <div className="flex gap-2 mt-6">
-                     <button onClick={() => {
-                        let distance = null, etaTime = null;
-                        if (selectedResponder.helperLat && selectedResponder.helperLng && hospitalUser?.lat && hospitalUser?.lng) {
-                           const r = 6371; const p = Math.PI / 180;
-                           const a = 0.5 - Math.cos((selectedResponder.helperLat - hospitalUser.lat) * p)/2 + 
-                                     Math.cos(hospitalUser.lat * p) * Math.cos(selectedResponder.helperLat * p) * 
-                                     (1 - Math.cos((selectedResponder.helperLng - hospitalUser.lng) * p))/2;
-                           distance = (2 * r * Math.asin(Math.sqrt(a))).toFixed(1);
-                           etaTime = Math.ceil(distance * 2);
-                        }
-                        setSelectedDonor({ 
-                           id: selectedResponder.userId, name: selectedResponder.name, 
-                           phone: selectedResponder.phone, bloodType: selectedResponder.bloodType,
-                           distance, etaTime,
-                           location: (selectedResponder.helperLat && selectedResponder.helperLng) ? { lat: selectedResponder.helperLat, lng: selectedResponder.helperLng } : null
-                        });
-                        setSelectedResponder(null);
-                     }} className="flex-1 bg-blue-100 text-blue-700 font-black py-4 rounded-xl shadow-sm hover:bg-blue-200 uppercase tracking-widest text-xs active:scale-95 transition-all text-center">
-                        💬 NHẮN TIN
-                     </button>
-                     <button onClick={() => setSelectedResponder(null)} className="flex-1 bg-slate-800 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-xs active:scale-95 transition-all text-center">
-                        ĐÃ XONG
-                     </button>
-                  </div>
-               </div>
+                })()}
+
+                <div className="flex gap-2 mt-6">
+                  <button onClick={() => {
+                    let distance = null, etaTime = null;
+                    if (selectedResponder.helperLat && selectedResponder.helperLng && hospitalUser?.lat && hospitalUser?.lng) {
+                      const r = 6371; const p = Math.PI / 180;
+                      const a = 0.5 - Math.cos((selectedResponder.helperLat - hospitalUser.lat) * p) / 2 +
+                        Math.cos(hospitalUser.lat * p) * Math.cos(selectedResponder.helperLat * p) *
+                        (1 - Math.cos((selectedResponder.helperLng - hospitalUser.lng) * p)) / 2;
+                      distance = (2 * r * Math.asin(Math.sqrt(a))).toFixed(1);
+                      etaTime = Math.ceil(distance * 2);
+                    }
+                    setSelectedDonor({
+                      id: selectedResponder.userId, name: selectedResponder.name,
+                      phone: selectedResponder.phone, bloodType: selectedResponder.bloodType,
+                      distance, etaTime,
+                      location: (selectedResponder.helperLat && selectedResponder.helperLng) ? { lat: selectedResponder.helperLat, lng: selectedResponder.helperLng } : null
+                    });
+                    setSelectedResponder(null);
+                  }} className="flex-1 bg-blue-100 text-blue-700 font-black py-4 rounded-xl shadow-sm hover:bg-blue-200 uppercase tracking-widest text-xs active:scale-95 transition-all text-center">
+                    💬 NHẮN TIN
+                  </button>
+                  <button onClick={() => setSelectedResponder(null)} className="flex-1 bg-slate-800 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-xs active:scale-95 transition-all text-center">
+                    ĐÃ XONG
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -768,13 +772,13 @@ const HospitalDashboard = () => {
       {/* MODAL CHI TIẾT VÀ CHAT */}
       {selectedDonor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-4xl max-h-screen overflow-hidden rounded-[2rem] shadow-2xl flex flex-col md:flex-row relative animate-in zoom-in-95 duration-300">
+          <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[2rem] shadow-2xl flex flex-col md:flex-row relative animate-in zoom-in-95 duration-300">
 
             {/* Nut tat */}
             <button onClick={() => setSelectedDonor(null)} className="absolute top-4 right-4 z-50 w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold">X</button>
 
             {/* Left: Info */}
-            <div className="w-full md:w-5/12 bg-slate-50 p-4 sm:p-6 border-r border-slate-200 flex flex-col items-center text-center overflow-y-auto hide-scrollbar max-h-screen">
+            <div className="w-full md:w-5/12 bg-slate-50 p-4 sm:p-6 border-r border-slate-200 flex flex-col items-center text-center overflow-y-auto hide-scrollbar">
               <div className="w-24 h-24 bg-gradient-to-br from-slate-700 to-slate-900 shadow-xl shadow-slate-500/30 rounded-full border-4 border-white flex justify-center items-center font-black text-white text-3xl mb-4">
                 {selectedDonor.bloodType}
               </div>
@@ -799,16 +803,16 @@ const HospitalDashboard = () => {
                   <span className="font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md text-xs w-max">{selectedDonor.donationCount || 0} lần</span>
                 </div>
                 {selectedDonor.age && (
-                <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center col-span-2 sm:col-span-1">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Thể Trạng</span>
-                  <span className="font-bold text-slate-800 text-xs">{selectedDonor.age}t / {selectedDonor.weight}kg / {selectedDonor.height}cm</span>
-                </div>
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center col-span-2 sm:col-span-1">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Thể Trạng</span>
+                    <span className="font-bold text-slate-800 text-xs">{selectedDonor.age}t / {selectedDonor.weight}kg / {selectedDonor.height}cm</span>
+                  </div>
                 )}
                 {selectedDonor.lastDonationDate && (
-                <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center col-span-2 sm:col-span-1">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Hiến gần nhất</span>
-                  <span className="font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md text-xs w-max">{new Date(selectedDonor.lastDonationDate).toLocaleDateString('vi-VN')}</span>
-                </div>
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center col-span-2 sm:col-span-1">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Hiến gần nhất</span>
+                    <span className="font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md text-xs w-max">{new Date(selectedDonor.lastDonationDate).toLocaleDateString('vi-VN')}</span>
+                  </div>
                 )}
               </div>
 
@@ -846,20 +850,20 @@ const HospitalDashboard = () => {
                     <p className="text-[10px] uppercase font-bold text-emerald-500 tracking-widest">Giao thức bảo mật với {hospitalUser.name}</p>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={async () => {
-                     await fetch(`https://donor-be.onrender.com/api/users/${selectedDonor.id}/chats`, {
-                         method: 'POST',
-                         headers: { 'Content-Type': 'application/json' },
-                         body: JSON.stringify({ 
-                             text: `📍 ĐỘI CẤP CỨU ĐÃ MỞ ĐƯỜNG ƯU TIÊN. Chạy theo định vị sau: https://maps.google.com/?q=${hospitalUser.lat},${hospitalUser.lng}`, 
-                             sender: hospitalUser.name, 
-                             hospitalId: hospitalUser.id 
-                         })
-                     });
+                    await fetch(`https://donor-be.onrender.com/api/users/${selectedDonor.id}/chats`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        text: `📍 ĐỘI CẤP CỨU ĐÃ MỞ ĐƯỜNG ƯU TIÊN. Chạy theo định vị sau: https://maps.google.com/?q=${hospitalUser.lat},${hospitalUser.lng}`,
+                        sender: hospitalUser.name,
+                        hospitalId: hospitalUser.id
+                      })
+                    });
                   }}
                   className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-md active:scale-95 flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700`}>
-                   📍 GỬI TỌA ĐỘ BỆNH VIỆN
+                  📍 GỬI TỌA ĐỘ BỆNH VIỆN
                 </button>
               </div>
 
@@ -867,21 +871,21 @@ const HospitalDashboard = () => {
               <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
                 <div className="w-full text-center text-xs text-slate-400 font-medium mb-8">Cuộc hội thoại được mã hóa</div>
 
-                  {messages.filter(m => m.hospitalId === hospitalUser.id).length === 0 ? (
-                    <div className="text-sm font-medium text-slate-400 text-center py-10">Chưa có tin nhắn nào. Bắt đầu phiên liên lạc 2 chiều ngay!</div>
-                  ) : (
-                    messages.filter(m => m.hospitalId === hospitalUser.id).map((m, idx) => (
-                      <div key={idx} className={`w-full flex ${m.sender !== 'donor' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm font-medium ${m.sender !== 'donor' ? 'bg-blue-600 text-white rounded-tr-sm shadow-md' : 'bg-white border text-slate-700 rounded-tl-sm shadow-sm'
-                          }`}>
-                          {m.sender !== 'donor' && <div className="text-[9px] text-blue-200 mb-0.5">{m.sender}</div>}
-                          {m.text}
-                          {m.image && <img src={m.image} alt="Đính kèm" className="mt-2 rounded-xl border border-white/20 w-full object-cover max-h-64 shadow-md bg-black/10" />}
-                        </div>
+                {messages.filter(m => m.hospitalId === hospitalUser.id).length === 0 ? (
+                  <div className="text-sm font-medium text-slate-400 text-center py-10">Chưa có tin nhắn nào. Bắt đầu phiên liên lạc 2 chiều ngay!</div>
+                ) : (
+                  messages.filter(m => m.hospitalId === hospitalUser.id).map((m, idx) => (
+                    <div key={idx} className={`w-full flex ${m.sender !== 'donor' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm font-medium ${m.sender !== 'donor' ? 'bg-blue-600 text-white rounded-tr-sm shadow-md' : 'bg-white border text-slate-700 rounded-tl-sm shadow-sm'
+                        }`}>
+                        {m.sender !== 'donor' && <div className="text-[9px] text-blue-200 mb-0.5">{m.sender}</div>}
+                        {m.text}
+                        {m.image && <img src={m.image} alt="Đính kèm" className="mt-2 rounded-xl border border-white/20 w-full object-cover max-h-64 shadow-md bg-black/10" />}
                       </div>
-                    ))
-                  )}
-                </div>
+                    </div>
+                  ))
+                )}
+              </div>
 
               {/* Chat Input */}
               <div className="p-4 border-t border-slate-100 bg-white">
@@ -979,7 +983,7 @@ const HospitalDashboard = () => {
                       </div>
                       <div className="flex-1 overflow-hidden">
                         <div className="flex justify-between items-center mb-1">
-                          <h4 className="font-bold text-sm text-slate-800 truncate">{u.name || (u.id.substring(0,8).toUpperCase())}</h4>
+                          <h4 className="font-bold text-sm text-slate-800 truncate">{u.name || (u.id.substring(0, 8).toUpperCase())}</h4>
                         </div>
                         <p className={`text-xs font-medium truncate ${lastMessage?.sender === 'donor' ? 'text-slate-800 font-bold' : 'text-slate-500'}`}>
                           {lastMessage?.sender === 'donor' ? 'Khách: ' : 'Bạn: '}
@@ -996,7 +1000,7 @@ const HospitalDashboard = () => {
             </div>
           </div>
         )}
-        
+
         <button onClick={() => setShowInbox(!showInbox)} className="w-16 h-16 bg-gradient-to-tr from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl transition-all active:scale-95 hover:-translate-y-1 border-4 border-white relative z-50">
           💬
           {inboxUsers.length > 0 && (
