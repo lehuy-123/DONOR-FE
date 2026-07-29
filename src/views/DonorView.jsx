@@ -189,7 +189,7 @@ const DonorView = () => {
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Họ & Tên</label>
                 <input required type="text" placeholder="Nguyễn Văn A" value={loginData.name} onChange={e => setLoginData({ ...loginData, name: e.target.value })} className="w-full bg-slate-50 border-0 ring-1 ring-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-rose-400 focus:bg-white text-slate-700 font-medium transition-all" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">SĐT Liên Lạc</label>
                   <input required type="text" placeholder="0901234567" value={loginData.phone} onChange={e => setLoginData({ ...loginData, phone: e.target.value })} className="w-full bg-slate-50 border-0 ring-1 ring-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-rose-400 focus:bg-white text-slate-700 font-medium transition-all" />

@@ -348,7 +348,7 @@ const HospitalDashboard = () => {
                 </h2>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
                 <div className="bg-white/10 p-3 rounded-2xl border border-white/20 backdrop-blur text-center">
                   <div className="text-[9px] uppercase font-bold text-white/70 tracking-widest mb-1">Tổng Dự Trữ</div>
                   <div className="text-2xl font-black">{inventory.reduce((a, b) => a + b.qty, 0)}<span className="text-sm">L</span></div>
@@ -407,7 +407,7 @@ const HospitalDashboard = () => {
                 <span className="text-rose-500">🩸</span> Phân Bổ Tồn Kho
               </h3>
             </div>
-            <div className="grid grid-cols-2 gap-4 group relative z-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-2 gap-4 group relative z-10">
               {inventory.map(renderBloodBag)}
             </div>
           </div>
@@ -709,7 +709,7 @@ const HospitalDashboard = () => {
       {/* NÚT INBOX GÓC PHẢI DƯỚI */}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end">
         {showInbox && (
-          <div className="bg-white w-80 sm:w-96 rounded-3xl shadow-2xl border border-slate-100 mb-4 overflow-hidden animate-in fade-in slide-in-from-bottom-5">
+          <div className="bg-white w-[90vw] sm:w-80 md:w-96 rounded-3xl shadow-2xl border border-slate-100 mb-4 overflow-hidden animate-in fade-in slide-in-from-bottom-5">
             <div className="p-5 bg-gradient-to-br from-slate-800 to-slate-900 text-white flex items-center justify-between border-b-4 border-rose-500">
               <h3 className="font-black text-sm uppercase tracking-widest flex items-center gap-2">
                 <span className="text-2xl drop-shadow-md">📥</span> INBOX BỆNH VIỆN
