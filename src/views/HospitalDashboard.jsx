@@ -150,6 +150,7 @@ const HospitalDashboard = () => {
   const fileInputRef = useRef(null);
   const [inboxUsers, setInboxUsers] = useState([]);
   const [showInbox, setShowInbox] = useState(false);
+  const [donorAddress, setDonorAddress] = useState("Đang phân tích định vị không gian...");
 
   // Lắng nghe toàn bộ users để gom Hộp Thư
   // Lấy dữ liệu 1 lần lúc vào trang (API cần quét toàn bộ user để lấy history, trong dự án thật sẽ có 1 api /inbox riêng)
@@ -204,6 +205,21 @@ const HospitalDashboard = () => {
         .then(res => res.json())
         .then(data => setMessages(data.chats || []))
         .catch(e => console.error(e));
+        
+     // Phân tích ngược tọa độ thành địa chỉ thật
+     if (selectedDonor.location) {
+        setDonorAddress("Đang phân tích định vị không gian...");
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${selectedDonor.location.lat}&lon=${selectedDonor.location.lng}`)
+           .then(r => r.json())
+           .then(data => {
+               if(data && data.display_name) {
+                  setDonorAddress(data.display_name);
+               } else {
+                  setDonorAddress(`${selectedDonor.location.lat}, ${selectedDonor.location.lng}`);
+               }
+           })
+           .catch(() => setDonorAddress(`${selectedDonor.location.lat}, ${selectedDonor.location.lng}`));
+     }
   }, [selectedDonor]);
 
   const handleGenerateMock = async () => {
@@ -765,48 +781,54 @@ const HospitalDashboard = () => {
               <h2 className="text-2xl font-black text-slate-800">{selectedDonor.name}</h2>
               <p className="text-sm font-medium text-slate-500 mb-6">{selectedDonor.email}</p>
 
-              <div className="w-full space-y-3 mt-4 text-left">
-                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">SĐT</span>
-                  <span className="font-bold text-slate-800">{selectedDonor.phone}</span>
+              <div className="w-full space-y-2 mt-4 text-left">
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">SĐT</span>
+                  <span className="font-bold text-slate-800 text-sm">{selectedDonor.phone}</span>
                 </div>
-                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Khoảng cách</span>
-                  <span className="font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-md">{selectedDonor.distance ? `${selectedDonor.distance} KM` : 'Đang tính...'}</span>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Khoảng cách</span>
+                  <span className="font-bold text-rose-600 bg-rose-50 px-2 py-1 flex items-center rounded-md text-sm">{selectedDonor.distance ? `${selectedDonor.distance} KM` : 'Đang tính...'}</span>
                 </div>
                 {selectedDonor.etaTime && (
-                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Di chuyển</span>
-                  <span className="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md">{selectedDonor.etaTime} phút</span>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Di chuyển</span>
+                  <span className="font-bold text-blue-600 bg-blue-50 px-2 flex items-center py-1 rounded-md text-sm">{selectedDonor.etaTime} phút</span>
                 </div>
                 )}
-                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Lịch sử hiến</span>
-                  <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">{selectedDonor.donationCount || 0} lần</span>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lịch sử hiến</span>
+                  <span className="font-bold text-emerald-600 bg-emerald-50 px-2 flex items-center py-1 rounded-md text-sm">{selectedDonor.donationCount || 0} lần</span>
                 </div>
                 {selectedDonor.age && (
-                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Thể Trạng</span>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Thể Trạng</span>
                   <span className="font-bold text-slate-800 text-sm">{selectedDonor.age}t / {selectedDonor.weight}kg / {selectedDonor.height}cm</span>
                 </div>
                 )}
                 {selectedDonor.lastDonationDate && (
-                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Hiến gần nhất</span>
-                  <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">{new Date(selectedDonor.lastDonationDate).toLocaleDateString('vi-VN')}</span>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Hiến gần nhất</span>
+                  <span className="font-bold text-indigo-600 bg-indigo-50 px-2 flex items-center py-1 rounded-md text-sm">{new Date(selectedDonor.lastDonationDate).toLocaleDateString('vi-VN')}</span>
                 </div>
                 )}
               </div>
 
               {/* BẢN ĐỒ MINI XÁC KHẢO VỊ TRÍ VỆ TINH */}
               {selectedDonor.location && (
-                <div className="w-full mt-4 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-md relative h-32 group animate-in zoom-in-95 duration-700">
-                  <iframe
-                    width="100%" height="100%" frameBorder="0" style={{ border: 0, filter: 'contrast(1.1)' }}
-                    src={`https://maps.google.com/maps?q=${selectedDonor.location.lat},${selectedDonor.location.lng}&z=15&output=embed`}
-                  />
-                  <div className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur text-white text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md shadow-lg">
-                    Tọa độ Vệ tinh
+                <div className="w-full mt-4 flex flex-col gap-2">
+                  <div className="w-full rounded-2xl overflow-hidden border-2 border-slate-200 shadow-md relative h-48 group animate-in zoom-in-95 duration-700">
+                    <iframe
+                      width="100%" height="100%" frameBorder="0" style={{ border: 0, filter: 'contrast(1.1)' }}
+                      src={`https://maps.google.com/maps?q=${selectedDonor.location.lat},${selectedDonor.location.lng}&z=15&output=embed`}
+                    />
+                    <div className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur text-white text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md shadow-lg">
+                      Tọa độ Vệ tinh
+                    </div>
+                  </div>
+                  <div className="bg-white border flex items-start gap-2 border-slate-200 rounded-xl p-3 shadow-sm text-left">
+                    <span className="text-xl">📍</span>
+                    <p className="text-[10px] font-medium text-slate-600 leading-relaxed max-h-12 overflow-y-auto custom-scrollbar pr-1">{donorAddress}</p>
                   </div>
                 </div>
               )}
