@@ -254,6 +254,34 @@ const HospitalDashboard = () => {
     }
   };
 
+  const handleCallAll = async () => {
+    const pushableDonors = processedDonors.filter(d => d.pushSubscription);
+    if(pushableDonors.length === 0) {
+      alert("Không có vệ tinh nào trong danh sách hiện tại đã cấp quyền Push Notification!");
+      return;
+    }
+    
+    if(!window.confirm(`Phát lệnh báo động đồng loạt tới ${pushableDonors.length} vệ tinh? Động thái này sẽ làm rung thiết bị của họ!`)) return;
+
+    try {
+      await Promise.all(pushableDonors.map(donor => 
+        fetch("https://donor-be.onrender.com/api/emergency/push", {
+           method: "POST",
+           headers: { "Content-Type": "application/json" },
+           body: JSON.stringify({
+              userId: donor.id,
+              bloodType: donor.bloodType,
+              hospitalName: hospitalUser.name,
+              hospitalId: hospitalUser.id
+           })
+        })
+      ));
+      alert(`🔔 Đã hoàn tất phủ sóng tin nhắn khẩn cấp tới ${pushableDonors.length} vệ tinh!`);
+    } catch(e) {
+      alert("Đã xảy ra lỗi khi gửi thư tín hàng loạt.");
+    }
+  };
+
   const renderBloodBag = (item) => {
     const isCrit = item.qty < 10;
     const isWarn = item.qty >= 10 && item.qty <= 25;
@@ -484,8 +512,8 @@ const HospitalDashboard = () => {
                   <h3 className="text-xl font-black text-slate-800 tracking-tight">
                     Lọc được <span className="text-rose-600 font-black px-2 mx-1 bg-white shadow-sm border rounded-lg">{processedDonors.length}</span> vệ tinh
                   </h3>
-                  <button className="text-[10px] bg-white px-3 py-1.5 border rounded-full shadow-sm text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 font-bold uppercase transition-all tracking-wider">
-                    Gọi Tất Cả
+                  <button onClick={handleCallAll} className="text-[10px] bg-white px-3 py-1.5 border border-rose-200 rounded-full shadow-sm text-rose-600 hover:bg-rose-50 hover:text-rose-700 font-bold uppercase transition-all tracking-wider flex items-center gap-1 active:scale-95">
+                    🚨 Gọi Tất Cả
                   </button>
                 </div>
                 <div className="flex gap-2">
