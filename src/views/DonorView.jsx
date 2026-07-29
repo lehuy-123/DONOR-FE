@@ -40,10 +40,11 @@ const DonorView = () => {
   }, []);
 
   useEffect(() => {
-    if (!user?.id) return;
+    const activeId = user?.id || user?._id;
+    if (!activeId) return;
 
     // Lấy lịch sử chat bằng REST API
-    fetch(`https://donor-be.onrender.com/api/users/${user.id}/chats`)
+    fetch(`https://donor-be.onrender.com/api/users/${activeId}/chats`)
        .then(res => {
            if (res.status === 404 || res.status === 401) {
                localStorage.removeItem('me_donor');
@@ -61,7 +62,7 @@ const DonorView = () => {
        .catch(e => console.error(e));
 
     // Lắng nghe Real-time bằng Socket.io thay vì onSnapshot
-    socket.emit('join-donor', user.id);
+    socket.emit('join-donor', activeId);
     
     const messageListener = (latestMsg) => {
          setMessages(prev => [...prev, latestMsg]);
@@ -114,33 +115,7 @@ const DonorView = () => {
     };
   }, [user?.id, user?.bloodType]);
 
-  const handleSendReply = async (e) => {
-    e.preventDefault();
-    if (!chatMessage.trim() || !user) return;
-    const text = chatMessage;
-    setChatMessage("");
-    
-    // Gửi chat bằng REST API
-    await fetch(`https://donor-be.onrender.com/api/users/${user.id}/chats`, {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ text, sender: 'donor', hospitalId: selectedHospitalId })
-    });
-  };
 
-  const handleSendImage = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      await fetch(`https://donor-be.onrender.com/api/users/${user.id}/chats`, {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ text: "📷 Hình ảnh từ rà soát", sender: 'donor', hospitalId: selectedHospitalId, image: event.target.result })
-      });
-    };
-    reader.readAsDataURL(file);
-  };
 
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -284,7 +259,7 @@ const DonorView = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-[10px] font-black tracking-widest text-white/70 uppercase">ID Định Danh</div>
-                  <div className="font-mono text-sm tracking-wider font-bold">{user.id.substring(0, 8).toUpperCase()}</div>
+                  <div className="font-mono text-sm tracking-wider font-bold">{(user.id || user._id || "NEWUSER").substring(0, 8).toUpperCase()}</div>
                 </div>
               </div>
 
@@ -367,7 +342,7 @@ const DonorView = () => {
                 </div>
               ) : (
                 <button onClick={async () => {
-                   const token = await requestPermissionAndGetToken(user?.id);
+                   const token = await requestPermissionAndGetToken(user?.id || user?._id);
                    if(token) setUser({...user, fcmToken: token});
                 }} className="w-full bg-slate-800 hover:bg-black text-white font-black py-3 rounded-xl shadow-md text-xs transition-all active:scale-95 flex items-center justify-center gap-2">
                   KÍCH HOẠT PUSH
@@ -416,7 +391,7 @@ const DonorView = () => {
                 </div>
               </div>
               <button onClick={async () => {
-                 await fetch(`https://donor-be.onrender.com/api/users/${user.id}/chats`, {
+                 await fetch(`https://donor-be.onrender.com/api/users/${user?.id || user?._id}/chats`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: "🟢 TÔI KHỎE MẠNH! ĐÃ NHẬN TIẾP ĐƯỜNG VÀ SẴN SÀNG DI CHUYỂN NGAY LẬP TỨC.", sender: 'donor', hospitalId: selectedHospitalId })
@@ -449,11 +424,33 @@ const DonorView = () => {
               </div>
 
             <div className="p-4 bg-white border-t border-slate-100 rounded-b-[2rem]">
-              <form onSubmit={handleSendReply} className="flex gap-3 bg-slate-50 border border-slate-200 p-1.5 rounded-2xl relative shadow-inner">
+              <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!chatMessage.trim() || !user) return;
+                  const text = chatMessage;
+                  setChatMessage("");
+                  await fetch(`https://donor-be.onrender.com/api/users/${user?.id || user?._id}/chats`, {
+                       method: 'POST',
+                       headers: { 'Content-Type': 'application/json' },
+                       body: JSON.stringify({ text, sender: 'donor', hospitalId: selectedHospitalId })
+                  });
+              }} className="flex gap-3 bg-slate-50 border border-slate-200 p-1.5 rounded-2xl relative shadow-inner">
                 <button type="button" onClick={() => fileInputRef.current?.click()} className="bg-slate-200 hover:bg-slate-300 text-slate-600 w-12 flex items-center justify-center rounded-xl transition-all shadow-inner active:scale-95 text-xl cursor-pointer">
                   📷
                 </button>
-                <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleSendImage} />
+                <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = async (event) => {
+                    await fetch(`https://donor-be.onrender.com/api/users/${user?.id || user?._id}/chats`, {
+                       method: 'POST',
+                       headers: { 'Content-Type': 'application/json' },
+                       body: JSON.stringify({ text: "📷 Hình ảnh từ rà soát", sender: 'donor', hospitalId: selectedHospitalId, image: event.target.result })
+                    });
+                  };
+                  reader.readAsDataURL(file);
+                }} />
                 <input type="text" value={chatMessage} onChange={e => setChatMessage(e.target.value)} placeholder="Nhắn tin cho Bác sĩ..." className="flex-1 bg-transparent px-4 py-3 outline-none text-sm font-medium text-slate-700 placeholder:text-slate-400" />
                 <button type="submit" className="bg-slate-800 hover:bg-black active:scale-90 text-white p-3 px-6 rounded-xl font-black text-xs uppercase tracking-widest shadow-md transition-all">Gửi Lệnh</button>
               </form>
