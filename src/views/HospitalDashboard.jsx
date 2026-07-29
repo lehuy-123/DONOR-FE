@@ -530,8 +530,31 @@ const HospitalDashboard = () => {
                   <h3 className="text-xl font-black text-slate-800 mb-1">Chi Tiết Viện Trợ</h3>
                   <p className="text-xs font-bold text-emerald-600 mb-6 uppercase tracking-widest">{selectedResponder.supportType || 'Cá nhân hỗ trợ'}</p>
                   
-                  <div className="space-y-4">
-                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  {(() => {
+                     let etaInfo = null;
+                     if (selectedResponder.helperLat && selectedResponder.helperLng && hospitalUser?.lat && hospitalUser?.lng) {
+                        const r = 6371; const p = Math.PI / 180;
+                        const a = 0.5 - Math.cos((selectedResponder.helperLat - hospitalUser.lat) * p)/2 + 
+                                  Math.cos(hospitalUser.lat * p) * Math.cos(selectedResponder.helperLat * p) * 
+                                  (1 - Math.cos((selectedResponder.helperLng - hospitalUser.lng) * p))/2;
+                        const km = (2 * r * Math.asin(Math.sqrt(a))).toFixed(1);
+                        etaInfo = { km, time: Math.ceil(km * 2) };
+                     }
+                     return (
+                        <div className="space-y-4">
+                           {etaInfo && (
+                              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-2xl flex items-center justify-between shadow-lg shadow-blue-500/30">
+                                 <div>
+                                     <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-1">Đang Di Chuyển</p>
+                                     <p className="text-xl font-black">{etaInfo.time} <span className="text-sm font-medium">phút</span></p>
+                                 </div>
+                                 <div className="text-right">
+                                     <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-1">Khoảng Cách</p>
+                                     <p className="text-lg font-bold">{etaInfo.km} <span className="text-xs font-medium">KM</span></p>
+                                 </div>
+                              </div>
+                           )}
+                           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Người Xuất Phát Đi</p>
                         <p className="text-sm font-bold text-slate-800">{selectedResponder.helperName || selectedResponder.name}</p>
                      </div>
@@ -543,14 +566,24 @@ const HospitalDashboard = () => {
                         <a href={`tel:${selectedResponder.helperPhone || selectedResponder.phone}`} className="w-10 h-10 bg-emerald-500 text-white rounded-xl shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all">📞</a>
                      </div>
                      <div className="bg-rose-50 text-rose-700 p-4 rounded-2xl border border-rose-100 flex items-center justify-between">
-                        <p className="text-[10px] font-black uppercase tracking-widest">Loại Máu</p>
-                        <p className="text-2xl font-black">{selectedResponder.helperBloodType || selectedResponder.bloodType}</p>
-                     </div>
-                  </div>
+                         <p className="text-[10px] font-black uppercase tracking-widest">Loại Máu</p>
+                         <p className="text-2xl font-black">{selectedResponder.helperBloodType || selectedResponder.bloodType}</p>
+                      </div>
+                   </div>
+                  )
+                  })()}
                   
-                  <button onClick={() => setSelectedResponder(null)} className="w-full mt-6 bg-slate-800 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-xs active:scale-95 transition-all">
-                     ĐÃ TIẾP NHẬN BÁO CÁO
-                  </button>
+                  <div className="flex gap-2 mt-6">
+                     <button onClick={() => {
+                        setSelectedDonor({ id: selectedResponder.userId, name: selectedResponder.name, phone: selectedResponder.phone, bloodType: selectedResponder.bloodType });
+                        setSelectedResponder(null);
+                     }} className="flex-1 bg-blue-100 text-blue-700 font-black py-4 rounded-xl shadow-sm hover:bg-blue-200 uppercase tracking-widest text-xs active:scale-95 transition-all text-center">
+                        💬 NHẮN TIN
+                     </button>
+                     <button onClick={() => setSelectedResponder(null)} className="flex-1 bg-slate-800 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-xs active:scale-95 transition-all text-center">
+                        ĐÃ XONG
+                     </button>
+                  </div>
                </div>
             </div>
           )}

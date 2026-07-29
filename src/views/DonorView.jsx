@@ -29,6 +29,12 @@ const DonorView = () => {
   const [supportForm, setSupportForm] = useState({ type: 'Cá nhân hỗ trợ', helperName: '', helperPhone: '', helperBloodType: 'O+' });
   const [broadcastPage, setBroadcastPage] = useState(1);
   const broadcastsPerPage = 10;
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 15000); // Cập nhật mảng mỗi 15s để làm timer xóa 3 phút
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const savedMe = localStorage.getItem('me_donor');
@@ -271,29 +277,64 @@ const DonorView = () => {
                   </div>
                 )}
                 
-                <button onClick={async () => {
-                   try {
-                       const payload = {
-                           userId: user.id || user._id, 
-                           status: 'Đồng Ý',
-                           supportType: supportForm.type,
-                           helperName: supportForm.type === 'Cá nhân hỗ trợ' ? user.name : supportForm.helperName,
-                           helperPhone: supportForm.type === 'Cá nhân hỗ trợ' ? user.phone : supportForm.helperPhone,
-                           helperBloodType: supportForm.type === 'Cá nhân hỗ trợ' ? user.bloodType : supportForm.helperBloodType
-                       };
-                       await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify(payload)
-                       });
-                       setBroadcasts(prev => prev.map(old => old.id === activeBroadcastForm.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
-                       setActiveBroadcastForm(null);
-                   } catch(e) {
-                       alert("Lỗi kết nối về trung tâm!");
-                   }
-                }} className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 uppercase tracking-widest text-xs transition-all">
-                   GỬI BÁO CÁO HỖ TRỢ
-                </button>
+                {supportForm.type === 'Cá nhân hỗ trợ' ? (
+                   <div className="flex flex-col gap-2">
+                       <button onClick={async () => {
+                          try {
+                              const payload = {
+                                  userId: user.id || user._id, status: 'Đồng Ý', supportType: 'TÔI SẼ ĐẾN NGAY',
+                                  helperName: user.name, helperPhone: user.phone, helperBloodType: user.bloodType,
+                                  helperLat: location?.lat || user.location?.lat || (10.7769 + (Math.random() * 0.1 - 0.05)),
+                                  helperLng: location?.lng || user.location?.lng || (106.7009 + (Math.random() * 0.1 - 0.05)),
+                                  respondedAt: new Date().toISOString()
+                              };
+                              await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                                 method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                 body: JSON.stringify(payload)
+                              });
+                              setBroadcasts(prev => prev.map(old => old.id === activeBroadcastForm.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
+                              setActiveBroadcastForm(null);
+                          } catch(e) { alert("Lỗi kết nối về trung tâm!"); }
+                       }} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-4 rounded-xl shadow-lg shadow-rose-500/30 uppercase tracking-widest text-sm active:scale-95 transition-all text-center flex items-center justify-center gap-2">
+                           🏍️ TÔI SẼ ĐẾN NGAY CÙNG VỊ TRÍ
+                       </button>
+                       <button onClick={async () => {
+                          try {
+                              const payload = {
+                                  userId: user.id || user._id, status: 'Đồng Ý', supportType: supportForm.type,
+                                  helperName: user.name, helperPhone: user.phone, helperBloodType: user.bloodType,
+                                  respondedAt: new Date().toISOString()
+                              };
+                              await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                                 method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                 body: JSON.stringify(payload)
+                              });
+                              setBroadcasts(prev => prev.map(old => old.id === activeBroadcastForm.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
+                              setActiveBroadcastForm(null);
+                          } catch(e) { alert("Lỗi kết nối về trung tâm!"); }
+                       }} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl uppercase tracking-widest text-xs active:scale-95 transition-all">
+                           Chỉ Báo Danh Sẵn Sàng
+                       </button>
+                   </div>
+                ) : (
+                   <button onClick={async () => {
+                      try {
+                          const payload = {
+                              userId: user.id || user._id, status: 'Đồng Ý', supportType: supportForm.type,
+                              helperName: supportForm.helperName, helperPhone: supportForm.helperPhone, helperBloodType: supportForm.helperBloodType,
+                              respondedAt: new Date().toISOString()
+                          };
+                          await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                             method: 'POST', headers: { 'Content-Type': 'application/json' },
+                             body: JSON.stringify(payload)
+                          });
+                          setBroadcasts(prev => prev.map(old => old.id === activeBroadcastForm.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
+                          setActiveBroadcastForm(null);
+                      } catch(e) { alert("Lỗi kết nối về trung tâm!"); }
+                   }} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-4 rounded-xl shadow-lg shadow-rose-500/30 uppercase tracking-widest text-sm active:scale-95 transition-all">
+                       ĐĂNG KÝ NGƯỜI CHUYỂN TIẾP
+                   </button>
+                )}
              </div>
           </div>
         </div>
@@ -479,10 +520,18 @@ const DonorView = () => {
             <h3 className="text-sm font-black text-rose-700 uppercase tracking-widest mb-3 flex items-center gap-2">
               <span className="animate-pulse">🚨</span> BẢNG TIN KHẨN CẤP
             </h3>
-            
             {broadcasts.length > 0 ? (
               <div className="space-y-3 max-h-96 overflow-y-auto pr-1 custom-scrollbar">
-                {broadcasts.slice((broadcastPage - 1) * broadcastsPerPage, broadcastPage * broadcastsPerPage).map(b => {
+                {broadcasts
+                  .filter(b => {
+                      const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
+                      if (responded && responded.respondedAt) {
+                         return now - new Date(responded.respondedAt).getTime() <= 3 * 60 * 1000;
+                      }
+                      return true;
+                  })
+                  .slice((broadcastPage - 1) * broadcastsPerPage, broadcastPage * broadcastsPerPage)
+                  .map(b => {
                   const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
                   return (
                     <div key={b.id} className="bg-white rounded-2xl p-3 shadow-sm border border-rose-100 flex flex-col gap-2">
@@ -498,17 +547,28 @@ const DonorView = () => {
                         <div className="flex gap-2 mt-1">
                           <button onClick={() => setActiveBroadcastForm(b)} className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-black py-1.5 rounded-lg active:scale-95 transition-all">SẴN SÀNG HỖ TRỢ</button>
                           <button onClick={async () => {
+                            const payload = { userId: user.id || user._id, status: 'Từ Chối', respondedAt: new Date().toISOString() };
                             await fetch(`https://donor-be.onrender.com/api/broadcasts/${b.id}/respond`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ userId: user.id || user._id, status: 'Từ Chối' })
+                              body: JSON.stringify(payload)
                             });
-                            setBroadcasts(prev => prev.map(old => old.id === b.id ? { ...old, responders: [...(old.responders || []), { userId: user.id || user._id, status: 'Từ Chối' }] } : old));
+                            setBroadcasts(prev => prev.map(old => old.id === b.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
                           }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all">TỪ CHỐI</button>
                         </div>
                       ) : (
-                        <div className={`text-[11px] mt-1 font-bold px-2 py-1.5 rounded-md text-center ${responded.status === 'Đồng Ý' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
-                          {responded.status === 'Đồng Ý' ? '✅ ĐÃ ĐĂNG KÝ HỖ TRỢ' : '❌ ĐÃ TỪ CHỐI'}
+                        <div className="flex gap-2 mt-1">
+                          <div className={`flex-1 text-[11px] font-bold px-2 py-1.5 rounded-lg text-center ${responded.status === 'Đồng Ý' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
+                            {responded.status === 'Đồng Ý' ? '✅ ĐÃ ĐĂNG KÝ HỖ TRỢ' : '❌ ĐÃ TỪ CHỐI'}
+                          </div>
+                          {responded.status === 'Đồng Ý' && (
+                             <button onClick={() => {
+                               setSelectedHospitalId(b.hospitalId);
+                               document.getElementById('chat-room-section')?.scrollIntoView({ behavior: 'smooth' });
+                             }} className="bg-blue-100 hover:bg-blue-200 text-blue-600 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all flex items-center justify-center">
+                               💬 LIÊN LẠC
+                             </button>
+                          )}
                         </div>
                       )}
                     </div>
@@ -533,7 +593,7 @@ const DonorView = () => {
           </div>
 
           {/* MESSAGE ROOM CHUYÊN NGHIỆP */}
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col flex-1 min-h-[450px]">
+          <div id="chat-room-section" className="bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col flex-1 min-h-[450px]">
             <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 text-xl shadow-inner">🏥</div>
