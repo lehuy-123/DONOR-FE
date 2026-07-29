@@ -37,7 +37,7 @@ const DonorView = () => {
 
   const [showAIChat, setShowAIChat] = useState(false);
   const [aiHistory, setAiHistory] = useState([
-    { role: 'ai', text: 'Chào bạn, tôi là trợ lý AI ảo của Trạm Miễn Dịch. Bạn cần ghi nhận lịch trình, hay tìm hiểu chế độ dinh dưỡng hiến máu hôm nay?' }
+    { role: 'ai', text: 'Chào bạn, tôi là trợ lý AI ảo của BloodBridge. Bạn cần ghi nhận lịch trình, hay tìm hiểu chế độ dinh dưỡng hiến máu hôm nay?' }
   ]);
   const [aiInput, setAiInput] = useState('');
 
@@ -909,7 +909,7 @@ const DonorView = () => {
               </div>
               <button onClick={() => setShowAIChat(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 hover:scale-110 active:scale-95 transition-all font-black text-sm">✕</button>
             </div>
-            
+
             <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50 relative custom-scrollbar flex flex-col" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }}>
               {aiHistory.map((msg, idx) => (
                 <div key={idx} className={`w-full flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -922,10 +922,10 @@ const DonorView = () => {
 
             <form onSubmit={(e) => {
               e.preventDefault();
-              if(!aiInput.trim()) return;
+              if (!aiInput.trim()) return;
               setAiHistory([...aiHistory, { role: 'user', text: aiInput }]);
               setAiInput('');
-              
+
               // Mock AI Response
               setTimeout(() => {
                 setAiHistory(prev => [...prev, { role: 'ai', text: 'Cảm ơn ghi nhận của bạn. Tôi đang được nâng cấp để kết nối với cơ sở dữ liệu bệnh viện!' }]);
