@@ -787,12 +787,12 @@ const HospitalDashboard = () => {
                   <span className="font-bold text-slate-800 text-xs">{selectedDonor.phone}</span>
                 </div>
                 <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Khoảng cách</span>
-                  <span className="font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-md text-xs w-max">{selectedDonor.distance ? `${selectedDonor.distance} KM` : '...'}</span>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Khoảng cách (Lộ trình)</span>
+                  <span className="font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-md text-xs w-max">{selectedDonor.distance ? `~${(parseFloat(selectedDonor.distance) * 1.3).toFixed(1)} KM` : '...'}</span>
                 </div>
                 <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center">
                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Thời gian ETA</span>
-                  <span className="font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md text-xs w-max">{selectedDonor.etaTime || (selectedDonor.distance ? Math.round(parseFloat(selectedDonor.distance) * 2) : '--')} phút</span>
+                  <span className="font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md text-xs w-max">{selectedDonor.etaTime || (selectedDonor.distance ? Math.round(parseFloat(selectedDonor.distance) * 1.3 * 4.5) : '--')} phút</span>
                 </div>
                 <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center">
                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Lịch sử hiến</span>
