@@ -370,17 +370,32 @@ const DonorView = () => {
           {/* Hiệu ứng chớp đỏ liên tục */}
           <div className="absolute inset-0 bg-red-600 mix-blend-overlay animate-pulse opacity-50"></div>
 
-          <div className="bg-white max-w-lg w-full p-10 rounded-[2rem] shadow-2xl relative z-10 flex flex-col items-center text-center animate-in zoom-in-50 duration-500 border-8 border-red-500">
-            <div className="w-24 h-24 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-5xl mb-6 shadow-inner animate-bounce">
-              🚨
+          <div className="bg-white max-w-lg w-full p-8 sm:p-10 rounded-[2rem] shadow-2xl relative z-10 flex flex-col items-center text-center animate-in zoom-in-50 duration-500 border border-red-100 overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 to-rose-500"></div>
+            
+            <div className="w-20 h-20 bg-red-50 border border-red-100 text-red-600 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner animate-pulse">
+              <span className="drop-shadow-md">⚠️</span>
             </div>
-            <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight mb-2">Lệnh Điều Động Khẩn</h2>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-6">Mã Hệ Thống: E-001</p>
+            
+            <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight mb-2">THÔNG BÁO KHẨN CẤP</h2>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 font-mono bg-slate-50 px-3 py-1 rounded-md">CODE RED - CẤP CỨU Huyết Học</p>
 
-            <div className="bg-rose-50 border border-rose-100 p-6 rounded-2xl w-full mb-8">
-              <p className="text-rose-700 font-bold text-lg leading-relaxed shadow-sm">
-                <span className="font-black text-xl">{emergencyAlert.sender || "Tuyến Trên"}</span> đang có ca cấp cứu sinh tử cực kỳ nguy kịch.
-                <br /><br />Họ cần gấp nhóm máu <span className="text-rose-600 font-black text-2xl px-2">{user?.bloodType}</span> của bạn. Mạng người nằm trong tay bạn!
+            <div className="bg-red-50/50 border border-red-100 p-6 rounded-2xl w-full mb-8 text-left">
+              <p className="text-slate-700 text-sm leading-relaxed mb-4">
+                Trung tâm điều phối ghi nhận <span className="font-bold text-slate-900">{emergencyAlert.sender || "Tuyến Trên"}</span> đang phát đi lệnh báo động đỏ. Bệnh nhân đang trong tình trạng mất máu nguy kịch và cần truyền bổ sung khẩn cấp.
+              </p>
+              <div className="bg-white p-4 rounded-xl border border-red-50 flex items-center justify-between shadow-sm">
+                 <div>
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Nhóm máu chỉ định</p>
+                   <p className="font-black text-red-600 text-xl">{user?.bloodType}</p>
+                 </div>
+                 <div className="text-right">
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Mức độ ưu tiên</p>
+                   <p className="font-bold text-slate-800 text-sm">Tối đa (Cấp 1)</p>
+                 </div>
+              </div>
+              <p className="text-xs text-rose-600 font-medium mt-4 italic text-center">
+                * Vị trí của bạn được Radar nhận diện nằm trong "bán kính vàng" có thể ứng cứu kịp thời.
               </p>
             </div>
 
