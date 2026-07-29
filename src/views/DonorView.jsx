@@ -30,6 +30,7 @@ const DonorView = () => {
   const [broadcastPage, setBroadcastPage] = useState(1);
   const broadcastsPerPage = 10;
   const [now, setNow] = useState(Date.now());
+  const [activeMission, setActiveMission] = useState(null);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 15000); // Cập nhật mảng mỗi 15s để làm timer xóa 3 phút
@@ -128,16 +129,39 @@ const DonorView = () => {
       setBroadcasts(prev => [b, ...prev.filter(x => x.id !== b.id)]);
     };
 
+    const missionUpdateListener = (payload) => {
+      if (payload.userId === activeId) {
+          if (payload.isCompleted) setActiveMission(null);
+          else setActiveMission(payload);
+      }
+    };
+
     socket.on('receive-message', messageListener);
     socket.on('force-logout', forceLogoutListener);
     socket.on('new-broadcast', broadcastListener);
+    socket.on('emergency-mission-update', missionUpdateListener);
 
     return () => {
       socket.off('receive-message', messageListener);
       socket.off('force-logout', forceLogoutListener);
       socket.off('new-broadcast', broadcastListener);
+      socket.off('emergency-mission-update', missionUpdateListener);
     };
   }, [user?.id, user?.bloodType]);
+
+  // Load Active Mission once
+  useEffect(() => {
+    const activeId = user?.id || user?._id;
+    if (!activeId) return;
+    fetch(`https://donor-be.onrender.com/api/emergency-missions?userId=${activeId}`)
+      .then(res => res.json())
+      .then(data => {
+         if (data.missions && data.missions.length > 0) {
+             setActiveMission(data.missions[0]);
+         }
+      })
+      .catch(e => console.error(e));
+  }, [user?.id]);
 
 
 
@@ -361,20 +385,31 @@ const DonorView = () => {
             </div>
 
             <div className="flex flex-col gap-3 w-full">
-              <button onClick={() => {
-                socket.emit('emergency-response', { hospitalId: emergencyAlert.hospitalId, user: { id: user.id || user._id, name: user.name, phone: user.phone, bloodType: user.bloodType }, status: 'ĐẾN NGAY' });
-                setEmergencyAlert(null);
+              <button disabled={loading} onClick={async () => {
+                setLoading(true);
+                try {
+                  await fetch('https://donor-be.onrender.com/api/emergency-missions', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hospitalId: emergencyAlert.hospitalId, hospitalName: emergencyAlert.sender, userId: user.id || user._id, user: { ...user, id: user.id || user._id }, status: 'ĐANG ĐẾN' })
+                  });
+                } catch(e) {} finally { setLoading(false); setEmergencyAlert(null); }
               }} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 uppercase tracking-widest transition-all">
-                TÔI SẴN SÀNG ĐẾN NGAY
+                {loading ? 'Đang kích hoạt...' : 'TÔI SẴN SÀNG ĐẾN NGAY'}
               </button>
-              <button onClick={() => {
-                socket.emit('emergency-response', { hospitalId: emergencyAlert.hospitalId, user: { id: user.id || user._id, name: user.name, phone: user.phone, bloodType: user.bloodType }, status: 'CHẤP NHẬN' });
-                setEmergencyAlert(null);
+              
+              <button disabled={loading} onClick={async () => {
+                setLoading(true);
+                try {
+                  await fetch('https://donor-be.onrender.com/api/emergency-missions', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hospitalId: emergencyAlert.hospitalId, hospitalName: emergencyAlert.sender, userId: user.id || user._id, user: { ...user, id: user.id || user._id }, status: 'CHẤP NHẬN' })
+                  });
+                } catch(e) {} finally { setLoading(false); setEmergencyAlert(null); }
               }} className="w-full bg-slate-800 hover:bg-black text-white font-black py-4 rounded-xl shadow-lg active:scale-95 uppercase tracking-widest transition-all">
-                CHẤP NHẬN VÀ LIÊN HỆ
+                {loading ? 'Đang kích hoạt...' : 'CHẤP NHẬN VÀ LIÊN HỆ'}
               </button>
+              
               <button onClick={() => {
-                socket.emit('emergency-response', { hospitalId: emergencyAlert.hospitalId, user: { id: user.id || user._id, name: user.name, phone: user.phone, bloodType: user.bloodType }, status: 'TỪ CHỐI' });
                 setEmergencyAlert(null);
               }} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold py-4 rounded-xl active:scale-95 uppercase tracking-widest transition-all">
                 TỪ CHỐI
@@ -384,7 +419,6 @@ const DonorView = () => {
         </div>
       )}
 
-      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 px-2 gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-800 tracking-tight">Mỗi giọt máu trao đi - Một cuộc đời ở lại</h1>
@@ -397,6 +431,50 @@ const DonorView = () => {
           Đăng Xuất
         </button>
       </div>
+      
+      {/* KHU VỰC THỰC THI NHIỆM VỤ KHẨN CẤP */}
+      {activeMission && (
+        <div className="mb-8 bg-gradient-to-r from-red-600 to-rose-700 rounded-3xl p-6 shadow-xl shadow-red-500/20 text-white relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-20 translate-x-10"></div>
+           <h2 className="text-lg font-black uppercase tracking-widest mb-4 flex items-center gap-2"><span className="animate-pulse text-2xl">🚨</span> Nhiệm Vụ Điều Động Khẩn Cấp</h2>
+           
+           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-center">
+              <div className="flex-1 w-full">
+                 <p className="text-[10px] font-black text-red-200 uppercase tracking-widest mb-1">Mục Tiêu Di Chuyển</p>
+                 <p className="font-black text-2xl truncate drop-shadow-sm">{activeMission.hospitalName || "Bệnh Viện Tuyến Trên"}</p>
+                 <p className="text-sm text-red-100 mt-2 flex items-center gap-2">
+                   <span className="w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
+                   Trạng thái hiện tại: <span className="font-bold underline decoration-red-400 underline-offset-4">{activeMission.status}</span>
+                 </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                 <button disabled={activeMission.status !== 'ĐANG ĐẾN' && activeMission.status !== 'CHẤP NHẬN'} onClick={async () => {
+                    await fetch(`https://donor-be.onrender.com/api/emergency-missions/${activeMission.id}/status`, {
+                      method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ status: 'ĐÃ ĐẾN' })
+                    });
+                 }} className={`px-6 py-4 sm:py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${
+                    activeMission.status === 'ĐANG ĐẾN' || activeMission.status === 'CHẤP NHẬN' ? 'bg-white text-rose-600 hover:bg-slate-100 shadow-lg active:scale-95' :
+                    'bg-emerald-500 text-white border-2 border-emerald-400 opacity-80 cursor-not-allowed flex items-center gap-2'
+                 }`}>
+                    {activeMission.status === 'ĐANG ĐẾN' || activeMission.status === 'CHẤP NHẬN' ? 'Xác Nhận Đã Tới Viện' : '✔ Đã Tới Viện'}
+                 </button>
+
+                 <button disabled={activeMission.status !== 'ĐÃ ĐẾN'} onClick={async () => {
+                    if(!window.confirm('Xác nhận bạn đã hoàn tất quy trình lấy máu tại Bệnh viện?')) return;
+                    await fetch(`https://donor-be.onrender.com/api/emergency-missions/${activeMission.id}/status`, {
+                      method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ status: 'ĐÃ HIẾN MÁU' })
+                    });
+                 }} className={`px-6 py-4 sm:py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${
+                    activeMission.status === 'ĐÃ ĐẾN' ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95' :
+                    'bg-white/10 text-white/50 border border-white/20 cursor-not-allowed'
+                 }`}>
+                    Hoàn Tất Hiến Máu
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 

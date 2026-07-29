@@ -175,6 +175,30 @@ const HospitalDashboard = () => {
     fetchInbox();
   }, [hospitalUser]);
 
+  useEffect(() => {
+    if (!hospitalUser) return;
+    fetch(`https://donor-be.onrender.com/api/emergency-missions?hospitalId=${hospitalUser.id}`)
+      .then(res => res.json())
+      .then(data => {
+         if (data.missions) {
+            // Tính toán distance cho từng mission ngay khi tải
+            const initMissions = data.missions.map(m => {
+                if (m.user?.location?.lat && hospitalUser?.lat && !m.user.distance) {
+                    const r = 6371; const p = Math.PI / 180;
+                    const a = 0.5 - Math.cos((m.user.location.lat - hospitalUser.lat) * p) / 2 +
+                      Math.cos(hospitalUser.lat * p) * Math.cos(m.user.location.lat * p) *
+                      (1 - Math.cos((m.user.location.lng - hospitalUser.lng) * p)) / 2;
+                    const km = 2 * r * Math.asin(Math.sqrt(a));
+                    m.user.distance = km.toFixed(1);
+                }
+                return m;
+            });
+            setEmergencyResponders(initMissions);
+         }
+      })
+      .catch(e => console.log(e));
+  }, [hospitalUser]);
+
   // Lắng nghe tin nhắn Socket.io
   useEffect(() => {
     if (!hospitalUser) return;
@@ -191,18 +215,33 @@ const HospitalDashboard = () => {
     };
 
     const emergencyResponseListener = (payload) => {
+        if (payload.isCompleted) {
+           setEmergencyResponders(prev => prev.filter(p => p.id !== payload.id));
+           return;
+        }
+
+        // Tự động tính toán khoảng cách từ tọa độ của người hiến tới Bệnh viện
+        if (payload.user?.location?.lat && hospitalUser?.lat && !payload.user.distance) {
+            const r = 6371; const p = Math.PI / 180;
+            const a = 0.5 - Math.cos((payload.user.location.lat - hospitalUser.lat) * p) / 2 +
+              Math.cos(hospitalUser.lat * p) * Math.cos(payload.user.location.lat * p) *
+              (1 - Math.cos((payload.user.location.lng - hospitalUser.lng) * p)) / 2;
+            const km = 2 * r * Math.asin(Math.sqrt(a));
+            payload.user.distance = km.toFixed(1);
+        }
+
         setEmergencyResponders(prev => {
-           // Replace if already exists, else add to top
-           const filtered = prev.filter(p => p.user.id !== payload.user.id);
+           // Dùng id của logic mission mới thay vì payload.user.id
+           const filtered = prev.filter(p => p.id !== payload.id);
            return [payload, ...filtered];
         });
     };
 
     socket.on('receive-message', messageListener);
-    socket.on('emergency-response', emergencyResponseListener);
+    socket.on('emergency-mission-update', emergencyResponseListener);
     return () => {
         socket.off('receive-message', messageListener);
-        socket.off('emergency-response', emergencyResponseListener);
+        socket.off('emergency-mission-update', emergencyResponseListener);
     };
   }, [hospitalUser, selectedDonor]);
 
