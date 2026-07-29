@@ -135,11 +135,15 @@ const DonorView = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const dbUser = await loginOrRegisterDonor(loginData);
+      // Nhồi chung location nếu GPS đã bắt được trước khi click login
+      const dbUser = await loginOrRegisterDonor({ ...loginData, location });
       localStorage.setItem('me_donor', JSON.stringify(dbUser));
       setUser(dbUser);
+      
+      // Kích hoạt cập nhật ép buộc lại vị trí và update thẳng vào record DB vừa tạo
+      updateLocation(dbUser.id || dbUser._id, true);
     } catch (e) {
-      alert("Lệnh API thất bại! Vui lòng điền API KEY của bạn vào config/firebase.js");
+      alert("Lệnh API thất bại!");
     } finally {
       setLoading(false);
     }
