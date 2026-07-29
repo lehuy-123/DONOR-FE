@@ -451,8 +451,15 @@ const HospitalDashboard = () => {
               </div>
               <h3 className="text-xl font-black text-slate-800 mb-2">{h.name}</h3>
               <p className="text-xs text-slate-500 font-mono mb-6 border border-slate-100 bg-slate-50 py-1 rounded-xl">📍 {h.lat} , {h.lng}</p>
-              <button onClick={() => setHospitalUser(h)} className={`w-full py-4 rounded-2xl text-white font-bold tracking-widest bg-gradient-to-r ${h.color} shadow-lg active:scale-95 transition-transform uppercase text-sm`}>
-                Đăng Nhập
+              <button onClick={() => {
+                const pass = window.prompt(`🔒 YÊU CẦU MÃ TRUY CẬP Nội Bộ cho:\n${h.name}\n\n(Lưu ý: Chỉ dành cho Cán Bộ Y Tế.2512)`);
+                if (pass === "2512") {
+                  setHospitalUser(h);
+                } else if (pass !== null) {
+                  alert("❌ Mã truy cập không hợp lệ. Quá trình đăng nhập bị từ chối.");
+                }
+              }} className={`w-full py-4 rounded-2xl text-white font-bold tracking-widest bg-gradient-to-r ${h.color} shadow-lg active:scale-95 transition-transform uppercase text-sm flex items-center justify-center gap-2`}>
+                <span className="text-lg">🔒</span> Đăng Nhập Hệ Thống
               </button>
             </div>
           ))}
