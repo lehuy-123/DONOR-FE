@@ -898,7 +898,7 @@ const DonorView = () => {
       <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end">
         {/* Render Chatbox Window */}
         {showAIChat && (
-          <div className="bg-white w-80 sm:w-96 h-[32rem] rounded-3xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden mb-4 animate-in slide-in-from-bottom-8 duration-300">
+          <div className="bg-white w-[calc(100vw-3rem)] sm:w-96 h-[32rem] rounded-3xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden mb-4 animate-in slide-in-from-bottom-8 duration-300">
             <div className="bg-gradient-to-r from-rose-600 to-red-600 p-4 text-white flex justify-between items-center shadow-md z-10">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-xl shadow-inner border border-white/30">🩺</div>
