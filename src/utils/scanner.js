@@ -7,7 +7,7 @@ export const scanDonors = async (requiredBloodType, radiusInKm, hospitalLocation
             lng: hospitalLocation?.lng || ''
         }).toString();
 
-        const response = await fetch(`https://donor-be.onrender.com/api/users/scan?${queryParams}`);
+        const response = await fetch(`http://localhost:5000/api/users/scan?${queryParams}`);
         const data = await response.json();
         
         return data.donors || [];

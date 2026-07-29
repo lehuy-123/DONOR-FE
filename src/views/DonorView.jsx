@@ -5,7 +5,7 @@ import { loginOrRegisterDonor, updateDonorProfile } from '../utils/firestore';
 import { io } from "socket.io-client";
 
 // Khởi tạo Socket.io client kết nối tới Node.js Backend
-const socket = io("https://donor-be.onrender.com");
+const socket = io("http://localhost:5000");
 
 const DonorView = () => {
   const { fcmToken, permission, requestPermissionAndGetToken } = useWebPush();
@@ -29,6 +29,7 @@ const DonorView = () => {
   const [supportForm, setSupportForm] = useState({ type: 'Cá nhân hỗ trợ', helperName: '', helperPhone: '', helperBloodType: 'O+' });
   const [broadcastPage, setBroadcastPage] = useState(1);
   const broadcastsPerPage = 10;
+  const [bulletinTab, setBulletinTab] = useState('daily');
   const [now, setNow] = useState(Date.now());
   const [activeMission, setActiveMission] = useState(null);
 
@@ -56,7 +57,7 @@ const DonorView = () => {
     if (!activeId) return;
 
     // Lấy lịch sử chat bằng REST API
-    fetch(`https://donor-be.onrender.com/api/users/${activeId}/chats`)
+    fetch(`http://localhost:5000/api/users/${activeId}/chats`)
       .then(res => {
         if (res.status === 404 || res.status === 401) {
           localStorage.removeItem('me_donor');
@@ -73,7 +74,7 @@ const DonorView = () => {
       })
       .catch(e => console.error(e));
 
-    fetch(`https://donor-be.onrender.com/api/broadcasts`)
+    fetch(`http://localhost:5000/api/broadcasts`)
       .then(res => res.json())
       .then(data => {
         if (data.broadcasts) setBroadcasts(data.broadcasts);
@@ -153,7 +154,7 @@ const DonorView = () => {
   useEffect(() => {
     const activeId = user?.id || user?._id;
     if (!activeId) return;
-    fetch(`https://donor-be.onrender.com/api/emergency-missions?userId=${activeId}`)
+    fetch(`http://localhost:5000/api/emergency-missions?userId=${activeId}`)
       .then(res => res.json())
       .then(data => {
          if (data.missions && data.missions.length > 0) {
@@ -312,7 +313,7 @@ const DonorView = () => {
                         helperLng: location?.lng || user.location?.lng || (106.7009 + (Math.random() * 0.1 - 0.05)),
                         respondedAt: new Date().toISOString()
                       };
-                      await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                      await fetch(`http://localhost:5000/api/broadcasts/${activeBroadcastForm.id}/respond`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                       });
@@ -329,7 +330,7 @@ const DonorView = () => {
                         helperName: user.name, helperPhone: user.phone, helperBloodType: user.bloodType,
                         respondedAt: new Date().toISOString()
                       };
-                      await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                      await fetch(`http://localhost:5000/api/broadcasts/${activeBroadcastForm.id}/respond`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                       });
@@ -348,7 +349,7 @@ const DonorView = () => {
                       helperName: supportForm.helperName, helperPhone: supportForm.helperPhone, helperBloodType: supportForm.helperBloodType,
                       respondedAt: new Date().toISOString()
                     };
-                    await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                    await fetch(`http://localhost:5000/api/broadcasts/${activeBroadcastForm.id}/respond`, {
                       method: 'POST', headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify(payload)
                     });
@@ -403,7 +404,7 @@ const DonorView = () => {
               <button disabled={loading} onClick={async () => {
                 setLoading(true);
                 try {
-                  await fetch('https://donor-be.onrender.com/api/emergency-missions', {
+                  await fetch('http://localhost:5000/api/emergency-missions', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ hospitalId: emergencyAlert.hospitalId, hospitalName: emergencyAlert.sender, userId: user.id || user._id, user: { ...user, id: user.id || user._id }, status: 'ĐANG ĐẾN' })
                   });
@@ -415,7 +416,7 @@ const DonorView = () => {
               <button disabled={loading} onClick={async () => {
                 setLoading(true);
                 try {
-                  await fetch('https://donor-be.onrender.com/api/emergency-missions', {
+                  await fetch('http://localhost:5000/api/emergency-missions', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ hospitalId: emergencyAlert.hospitalId, hospitalName: emergencyAlert.sender, userId: user.id || user._id, user: { ...user, id: user.id || user._id }, status: 'CHẤP NHẬN' })
                   });
@@ -465,7 +466,7 @@ const DonorView = () => {
               
               <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                  <button disabled={activeMission.status !== 'ĐANG ĐẾN' && activeMission.status !== 'CHẤP NHẬN'} onClick={async () => {
-                    await fetch(`https://donor-be.onrender.com/api/emergency-missions/${activeMission.id}/status`, {
+                    await fetch(`http://localhost:5000/api/emergency-missions/${activeMission.id}/status`, {
                       method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ status: 'ĐÃ ĐẾN' })
                     });
                  }} className={`px-6 py-4 sm:py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${
@@ -477,7 +478,7 @@ const DonorView = () => {
 
                  <button disabled={activeMission.status !== 'ĐÃ ĐẾN'} onClick={async () => {
                     if(!window.confirm('Xác nhận bạn đã hoàn tất quy trình lấy máu tại Bệnh viện?')) return;
-                    await fetch(`https://donor-be.onrender.com/api/emergency-missions/${activeMission.id}/status`, {
+                    await fetch(`http://localhost:5000/api/emergency-missions/${activeMission.id}/status`, {
                       method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ status: 'ĐÃ HIẾN MÁU' })
                     });
                  }} className={`px-6 py-4 sm:py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${
@@ -589,56 +590,110 @@ const DonorView = () => {
             </div>
           </div>
 
-          <div className="bg-rose-50 border-2 border-rose-200 rounded-3xl p-5 shadow-inner">
+          <div className="bg-rose-50 border-2 border-rose-200 rounded-3xl p-5 shadow-inner flex flex-col max-h-[40rem]">
             <h3 className="text-sm font-black text-rose-700 uppercase tracking-widest mb-3 flex items-center gap-2">
-              <span className="animate-pulse">🚨</span> BẢNG TIN KHẨN CẤP
+              <span className="text-lg">📢</span> BẢNG TIN BỆNH VIỆN
             </h3>
+
+            {/* TAB CHUYỂN ĐỔI BẢNG TIN */}
+            <div className="flex bg-white/60 p-1 rounded-xl mb-3 shadow-sm border border-rose-100 shrink-0">
+               <button onClick={() => setBulletinTab('daily')} className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${bulletinTab === 'daily' ? 'bg-white text-orange-600 shadow border border-orange-100' : 'text-slate-500 hover:bg-white/40'}`}>
+                 Trong Ngày
+               </button>
+               <button onClick={() => setBulletinTab('schedule')} className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${bulletinTab === 'schedule' ? 'bg-white text-blue-600 shadow border border-blue-100' : 'text-slate-500 hover:bg-white/40'}`}>
+                 Đặt Lịch Hẹn
+               </button>
+            </div>
+
             {broadcasts.length > 0 ? (
-              <div className="space-y-3 max-h-96 overflow-y-auto pr-1 custom-scrollbar">
+              <div className="space-y-3 overflow-y-auto pr-1 custom-scrollbar flex-1">
                 {broadcasts
-                  .filter(b => {
-                    const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
-                    if (responded && responded.respondedAt) {
-                      return now - new Date(responded.respondedAt).getTime() <= 3 * 60 * 1000;
-                    }
-                    return true;
-                  })
-                  .slice((broadcastPage - 1) * broadcastsPerPage, broadcastPage * broadcastsPerPage)
+                  .filter(b => b.type === bulletinTab || (!b.type && bulletinTab === 'daily'))
                   .map(b => {
                     const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
+                    const isSchedule = b.type === 'schedule' || bulletinTab === 'schedule';
+                    const approvedCount = b.responders?.filter(r => r.status === 'Đồng Ý').length || 0;
+                    const maxDonors = b.maxDonors || 0;
+                    const isFull = maxDonors > 0 && approvedCount >= maxDonors;
+
+                    // Nếu kín lịch và người này chưa đăng ký, ẩn bài đi.
+                    if (isFull && !responded) return null;
+
                     return (
-                      <div key={b.id} className="bg-white rounded-2xl p-3 shadow-sm border border-rose-100 flex flex-col gap-2">
+                      <div key={b.id} className={`bg-white rounded-2xl p-3 shadow-sm border ${isSchedule ? 'border-blue-100' : 'border-orange-100'} flex flex-col gap-2`}>
                         <div>
-                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 mb-1">
-                            <span className="bg-rose-600 text-white px-1.5 py-0.5 rounded text-[10px] uppercase">{b.hospitalName}</span>
-                            Cần nhóm máu: <span className="text-rose-600">[{b.bloodTypes.join(', ')}]</span>
+                          <div className="flex items-start justify-between mb-2">
+                            <span className={`text-white px-2 py-0.5 rounded text-[10px] font-black uppercase ${isSchedule ? 'bg-blue-600' : 'bg-orange-500'}`}>{b.hospitalName}</span>
+                            {isSchedule ? (
+                              <div className="flex flex-col items-end">
+                                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-blue-50 text-blue-600 mb-1 border border-blue-100">
+                                  📅 {b.scheduleDate}
+                                </span>
+                                <span className={`text-[9px] font-bold ${isFull ? 'text-rose-500' : 'text-slate-500'}`}>
+                                  Đã đăng ký: {approvedCount} / {maxDonors === 0 ? '∞' : maxDonors} {isFull && '(Đã Kín)'}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-orange-50 text-orange-600 border border-orange-100">
+                                📣 TRONG NGÀY
+                              </span>
+                            )}
                           </div>
-                          <p className="text-xs font-medium text-slate-700 leading-relaxed">{b.message}</p>
+                          <div className="text-[11px] font-bold text-slate-500 mb-1">
+                            Nhóm máu ưu tiên: <span className="text-rose-600">[{b.bloodTypes.join(', ')}]</span>
+                          </div>
+                          <p className="text-xs font-medium text-slate-700 leading-relaxed border-l-2 border-slate-200 pl-2 ml-1">{b.message}</p>
                         </div>
 
                         {!responded ? (
                           <div className="flex gap-2 mt-1">
-                            <button onClick={() => setActiveBroadcastForm(b)} className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-black py-1.5 rounded-lg active:scale-95 transition-all">SẴN SÀNG HỖ TRỢ</button>
+                            <button onClick={async () => {
+                              if (isSchedule) {
+                                if (window.confirm('Xác nhận đăng ký lịch hẹn hiến máu này?')) {
+                                  const payload = { 
+                                    userId: user.id || user._id, 
+                                    name: user.name,
+                                    phone: user.phone,
+                                    bloodType: user.bloodType,
+                                    status: 'Đồng Ý', 
+                                    supportType: 'Đăng ký Lịch hẹn',
+                                    respondedAt: new Date().toISOString() 
+                                  };
+                                  await fetch(`http://localhost:5000/api/broadcasts/${b.id}/respond`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(payload)
+                                  });
+                                  setBroadcasts(prev => prev.map(old => old.id === b.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
+                                }
+                              } else {
+                                setActiveBroadcastForm(b);
+                              }
+                            }} className={`flex-1 text-white text-[11px] font-black py-1.5 rounded-lg active:scale-95 transition-all ${isSchedule ? 'bg-blue-600 hover:bg-blue-700' : 'bg-orange-500 hover:bg-orange-600'}`}>
+                              {isSchedule ? 'ĐĂNG KÝ LỊCH NÀY' : 'SẴN SÀNG HỖ TRỢ'}
+                            </button>
                             <button onClick={async () => {
                               const payload = { userId: user.id || user._id, status: 'Từ Chối', respondedAt: new Date().toISOString() };
-                              await fetch(`https://donor-be.onrender.com/api/broadcasts/${b.id}/respond`, {
+                              await fetch(`http://localhost:5000/api/broadcasts/${b.id}/respond`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(payload)
                               });
                               setBroadcasts(prev => prev.map(old => old.id === b.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
-                            }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all">TỪ CHỐI</button>
+                            }} className="bg-slate-100 hover:bg-slate-200 text-slate-400 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all">
+                              BỎ QUA
+                            </button>
                           </div>
                         ) : (
                           <div className="flex gap-2 mt-1">
-                            <div className={`flex-1 text-[11px] font-bold px-2 py-1.5 rounded-lg text-center ${responded.status === 'Đồng Ý' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
-                              {responded.status === 'Đồng Ý' ? '✅ ĐÃ ĐĂNG KÝ HỖ TRỢ' : '❌ ĐÃ TỪ CHỐI'}
+                            <div className={`flex-1 text-[11px] font-bold px-2 py-1.5 rounded-lg text-center ${responded.status === 'Đồng Ý' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
+                              {responded.status === 'Đồng Ý' ? '✅ ĐÃ LƯU XÁC NHẬN' : '❌ ĐÃ BỎ QUA'}
                             </div>
                             {responded.status === 'Đồng Ý' && (
                               <button onClick={() => {
                                 setSelectedHospitalId(b.hospitalId);
                                 document.getElementById('chat-room-section')?.scrollIntoView({ behavior: 'smooth' });
-                              }} className="bg-blue-100 hover:bg-blue-200 text-blue-600 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all flex items-center justify-center">
+                              }} className="bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all flex items-center justify-center">
                                 💬 LIÊN LẠC
                               </button>
                             )}
@@ -742,7 +797,7 @@ const DonorView = () => {
                     onClick={async () => {
                       try {
                         const val = user.donationCount || 0;
-                        await fetch('https://donor-be.onrender.com/api/users/sync', {
+                        await fetch('http://localhost:5000/api/users/sync', {
                           method: 'POST', headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ ...user, donationCount: val, mockId: user.id || user._id })
                         });
@@ -782,7 +837,7 @@ const DonorView = () => {
               </div>
               
               <button onClick={async () => {
-                await fetch(`https://donor-be.onrender.com/api/users/${user?.id || user?._id}/chats`, {
+                await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
                   method: 'POST', headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ text: "🟢 TÔI KHỎE MẠNH! ĐÃ NHẬN TIẾP ĐƯỜNG VÀ SẴN SÀNG DI CHUYỂN NGAY LẬP TỨC.", sender: 'donor', hospitalId: selectedHospitalId })
                 });
@@ -819,7 +874,7 @@ const DonorView = () => {
                 if (!chatMessage.trim() || !user) return;
                 const text = chatMessage;
                 setChatMessage("");
-                await fetch(`https://donor-be.onrender.com/api/users/${user?.id || user?._id}/chats`, {
+                await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ text, sender: 'donor', hospitalId: selectedHospitalId })
@@ -833,7 +888,7 @@ const DonorView = () => {
                   if (!file) return;
                   const reader = new FileReader();
                   reader.onload = async (event) => {
-                    await fetch(`https://donor-be.onrender.com/api/users/${user?.id || user?._id}/chats`, {
+                    await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ text: "📷 Hình ảnh từ rà soát", sender: 'donor', hospitalId: selectedHospitalId, image: event.target.result })
