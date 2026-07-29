@@ -1,10 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, NavLink } from 'react-router-dom';
 import DonorView from './views/DonorView';
 import HospitalDashboard from './views/HospitalDashboard';
 import MediaView from './views/MediaView';
 
 function App() {
+  const [lang, setLang] = useState('vi');
+
+  const toggleLanguage = () => {
+    const nextLang = lang === 'vi' ? 'en' : 'vi';
+    
+    if (nextLang === 'en') {
+      const select = document.querySelector('.goog-te-combo');
+      if (select) {
+        select.value = 'en';
+        select.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+      } else {
+        document.cookie = 'googtrans=/vi/en; path=/';
+        window.location.reload();
+      }
+    } else {
+      // Find Google Translate's revert iframe or just clear cookie and reload as last resort
+      const frame = document.querySelector('iframe.goog-te-banner-frame');
+      let restored = false;
+      if (frame && frame.contentDocument) {
+        const btn = frame.contentDocument.getElementById(':1.restore');
+        if (btn) {
+            btn.click();
+            restored = true;
+        }
+      }
+      if (!restored) {
+          document.cookie = 'googtrans=/vi/vi; path=/';
+          document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          window.location.reload();
+      }
+    }
+    
+    setLang(nextLang);
+  };
+
   return (
     <div className="min-h-screen bg-rose-50 flex flex-col font-sans text-slate-800 selection:bg-rose-200 selection:text-rose-900 relative">
 
@@ -20,31 +55,39 @@ function App() {
       <div className="fixed bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-gradient-to-tl from-rose-200/40 to-transparent rounded-full mix-blend-multiply filter blur-[100px] pointer-events-none z-0"></div>
 
       {/* Navbar with Glassmorphism */}
-      <nav className="bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-rose-100/50 shadow-sm">
+      <nav className="bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-rose-100/50 shadow-sm notranslate">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center h-full">
               <img src="/logo_veintral.jpg" alt="VEINtral Logo" className="h-16 sm:h-20 w-auto object-contain mix-blend-multiply drop-shadow-sm" />
             </div>
-            <div className="flex space-x-2 h-full py-5 overflow-x-auto custom-scrollbar">
-              <NavLink
-                to="/"
-                className={({ isActive }) => `px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold uppercase transition-all duration-300 whitespace-nowrap ${isActive ? 'bg-rose-100 text-rose-700 shadow-inner' : 'text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}
+            <div className="flex items-center gap-1 sm:gap-2">
+              <div className="flex space-x-1 sm:space-x-2 h-full py-5 overflow-x-auto custom-scrollbar">
+                <NavLink
+                  to="/"
+                  className={({ isActive }) => `px-3 sm:px-4 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase transition-all duration-300 whitespace-nowrap ${isActive ? 'bg-rose-100 text-rose-700 shadow-inner' : 'text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}
+                >
+                  NGƯỜI HIẾN
+                </NavLink>
+                <NavLink
+                  to="/media"
+                  className={({ isActive }) => `px-3 sm:px-4 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase transition-all duration-300 whitespace-nowrap ${isActive ? 'bg-rose-100 text-rose-700 shadow-inner' : 'text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}
+                >
+                  TIN TỨC
+                </NavLink>
+                <NavLink
+                  to="/hospital"
+                  className={({ isActive }) => `px-3 sm:px-4 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase transition-all duration-300 whitespace-nowrap ${isActive ? 'bg-rose-100 text-rose-700 shadow-inner' : 'text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}
+                >
+                  BỆNH VIỆN
+                </NavLink>
+              </div>
+              <button 
+                onClick={toggleLanguage} 
+                className="ml-2 bg-slate-100 hover:bg-slate-200 text-rose-600 font-extrabold text-[10px] sm:text-xs px-3 py-1.5 rounded-full shadow-inner border border-slate-200 transition-all active:scale-95 flex items-center gap-1"
               >
-                DONOR
-              </NavLink>
-              <NavLink
-                to="/media"
-                className={({ isActive }) => `px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold uppercase transition-all duration-300 whitespace-nowrap ${isActive ? 'bg-rose-100 text-rose-700 shadow-inner' : 'text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}
-              >
-                MEDIA
-              </NavLink>
-              <NavLink
-                to="/hospital"
-                className={({ isActive }) => `px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold uppercase transition-all duration-300 whitespace-nowrap ${isActive ? 'bg-rose-100 text-rose-700 shadow-inner' : 'text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}
-              >
-                BỆNH VIỆN (ADMIN)
-              </NavLink>
+                {lang === 'vi' ? 'EN' : 'VI'} 🌐
+              </button>
             </div>
           </div>
         </div>

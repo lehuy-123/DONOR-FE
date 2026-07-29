@@ -849,9 +849,9 @@ const DonorView = () => {
                 <span className="text-xl">📍</span> Tọa độ GPS
               </h3>
               {location || user.location ? (
-                <span className="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-widest flex items-center gap-1.5 border border-emerald-100"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> ONLINE</span>
+                <span className="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-widest flex items-center gap-1.5 border border-emerald-100"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> TRỰC TUYẾN</span>
               ) : (
-                <span className="bg-slate-100 text-slate-500 text-[10px] px-2 py-1 rounded-md font-bold">OFFLINE</span>
+                <span className="bg-slate-100 text-slate-500 text-[10px] px-2 py-1 rounded-md font-bold">NGOẠI TUYẾN</span>
               )}
             </div>
 
@@ -879,15 +879,15 @@ const DonorView = () => {
               </h3>
               {user.fcmToken || fcmToken ? (
                 <div className="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold py-3 rounded-xl text-xs text-center flex items-center justify-center gap-2 shadow-sm">
-                  ACTIVE NOTIFICATION
+                  ĐÃ BẬT CẢNH BÁO
                 </div>
               ) : (
                 <button onClick={async () => {
                   const token = await requestPermissionAndGetToken(user?.id || user?._id);
                   if (token) setUser({ ...user, fcmToken: token });
                 }} className="w-full bg-slate-800 hover:bg-black text-white font-black py-3 rounded-xl shadow-md text-xs transition-all active:scale-95 flex items-center justify-center gap-2">
-                  CHO PHÉP NHẬN THÔNG BÁO
-                  <span className="bg-rose-500 px-1.5 rounded text-[9px] uppercase tracking-wider animate-pulse">Required</span>
+                  BẬT THEO DÕI KHẨN CẤP
+                  <span className="bg-rose-500 px-1.5 rounded text-[9px] uppercase tracking-wider animate-pulse">Bắt buộc</span>
                 </button>
               )}
             </div>

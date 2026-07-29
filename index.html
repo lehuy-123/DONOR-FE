@@ -21,9 +21,22 @@
   <meta name="theme-color" content="#ef4444" />
 </head>
 
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-</body>
+  <body>
+    <div id="root"></div>
+    <style>
+      /* Hide the GT banner and widget */
+      #google_translate_element { position: absolute; left: -9999px; z-index: -999; }
+      .goog-te-banner-frame.skiptranslate { display: none !important; }
+      body { top: 0px !important; }
+    </style>
+    <div id="google_translate_element"></div>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement({pageLanguage: 'vi', includedLanguages: 'en,vi', autoDisplay: false}, 'google_translate_element');
+      }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 
 </html>
