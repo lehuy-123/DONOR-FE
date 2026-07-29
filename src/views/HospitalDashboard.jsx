@@ -784,6 +784,18 @@ const HospitalDashboard = () => {
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Lịch sử hiến</span>
                   <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">{selectedDonor.donationCount || 0} lần</span>
                 </div>
+                {selectedDonor.age && (
+                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Thể Trạng</span>
+                  <span className="font-bold text-slate-800 text-sm">{selectedDonor.age}t / {selectedDonor.weight}kg / {selectedDonor.height}cm</span>
+                </div>
+                )}
+                {selectedDonor.lastDonationDate && (
+                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Hiến gần nhất</span>
+                  <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">{new Date(selectedDonor.lastDonationDate).toLocaleDateString('vi-VN')}</span>
+                </div>
+                )}
               </div>
 
               {/* BẢN ĐỒ MINI XÁC KHẢO VỊ TRÍ VỆ TINH */}

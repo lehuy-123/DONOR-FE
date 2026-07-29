@@ -55,6 +55,11 @@ export const generateMockData = async () => {
         const randomName = names[Math.floor(Math.random() * names.length)] + ' Văn ' + firstNames[Math.floor(Math.random() * firstNames.length)];
         const lat = 10.7769 + (Math.random() * 0.2 - 0.1); 
         const lng = 106.7009 + (Math.random() * 0.2 - 0.1);
+
+        const weight = Math.floor(45 + Math.random() * 45); // 45kg đến 90kg
+        const height = Math.floor(150 + Math.random() * 40); // 150cm đến 190cm
+        const age = Math.floor(18 + Math.random() * 42); // 18 đến 60 tuổi
+        const lastDonationDate = new Date(Date.now() - Math.random() * 300 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         
         await fetch(`${API_URL}/users/sync`, {
             method: 'POST',
@@ -66,7 +71,11 @@ export const generateMockData = async () => {
                 bloodType: randomBlood,
                 donationCount: Math.floor(Math.random() * 15),
                 isOnline: Math.random() > 0.5,
-                location: { lat, lng }
+                location: { lat, lng },
+                weight,
+                height,
+                age,
+                lastDonationDate
             })
         });
         count++;
