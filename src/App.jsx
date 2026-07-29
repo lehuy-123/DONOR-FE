@@ -23,9 +23,8 @@ function App() {
       <nav className="bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-rose-100/50 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
-            <div className="flex items-center gap-2">
-              <img src="/logo_veintral.jpg" alt="VEINtral Logo" className="h-10 sm:h-12 w-auto object-contain mix-blend-multiply drop-shadow-sm" />
-              <span className="text-xl sm:text-2xl font-black text-rose-700 tracking-tighter uppercase whitespace-nowrap drop-shadow-sm hidden md:block"></span>
+            <div className="flex items-center h-full">
+              <img src="/logo_veintral.jpg" alt="VEINtral Logo" className="h-16 sm:h-20 w-auto object-contain mix-blend-multiply drop-shadow-sm" />
             </div>
             <div className="flex space-x-2 h-full py-5 overflow-x-auto custom-scrollbar">
               <NavLink
