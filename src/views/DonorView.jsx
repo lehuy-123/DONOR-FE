@@ -25,6 +25,8 @@ const DonorView = () => {
   const fileInputRef = useRef(null);
   const previousMessagesLength = useRef(0);
   const [emergencyAlert, setEmergencyAlert] = useState(null);
+  const [activeBroadcastForm, setActiveBroadcastForm] = useState(null);
+  const [supportForm, setSupportForm] = useState({ type: 'Cá nhân hỗ trợ', helperName: '', helperPhone: '', helperBloodType: 'O+' });
 
   useEffect(() => {
     const savedMe = localStorage.getItem('me_donor');
@@ -235,6 +237,66 @@ const DonorView = () => {
   return (
     <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 pb-20 relative">
 
+      {/* SUPPORT FORM MODAL */}
+      {activeBroadcastForm && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl relative animate-in zoom-in-95 duration-300">
+             <button onClick={() => setActiveBroadcastForm(null)} className="absolute top-4 right-4 w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-rose-100 hover:text-rose-600 transition-colors">✕</button>
+             <h3 className="text-xl font-black text-slate-800 mb-1">Xác nhận hỗ trợ</h3>
+             <p className="text-xs font-bold text-slate-500 mb-6">Mạng lưới 🚨 {activeBroadcastForm.hospitalName}</p>
+             
+             <div className="space-y-4">
+                <div>
+                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Hình thức hỗ trợ</label>
+                   <select value={supportForm.type} onChange={e => setSupportForm({...supportForm, type: e.target.value})} className="w-full border border-slate-200 bg-slate-50 p-3 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-rose-500">
+                      <option value="Cá nhân hỗ trợ">Tự thân - Sẵn sàng xuất phát</option>
+                      <option value="Giới thiệu người khác">Cử người khác, hoặc có người quen trúng nhóm máu</option>
+                   </select>
+                </div>
+                
+                {supportForm.type === 'Giới thiệu người khác' && (
+                  <div className="space-y-3 p-4 bg-rose-50 border border-rose-100 rounded-xl">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-1">Thông tin người tuyến thay thế</p>
+                      <input type="text" placeholder="Họ và Tên" value={supportForm.helperName} onChange={e => setSupportForm({...supportForm, helperName: e.target.value})} className="w-full bg-white border border-rose-200 p-2.5 rounded-lg text-sm text-slate-700 font-medium outline-none focus:ring-2 focus:ring-rose-400" />
+                      <input type="text" placeholder="SĐT Liên lạc" value={supportForm.helperPhone} onChange={e => setSupportForm({...supportForm, helperPhone: e.target.value})} className="w-full bg-white border border-rose-200 p-2.5 rounded-lg text-sm text-slate-700 font-medium outline-none focus:ring-2 focus:ring-rose-400" />
+                      <select value={supportForm.helperBloodType} onChange={e => setSupportForm({...supportForm, helperBloodType: e.target.value})} className="w-full bg-rose-600 border border-rose-700 text-white p-2.5 rounded-lg text-sm font-black outline-none focus:ring-2 focus:ring-rose-400">
+                         <option value="O+">Nhóm O (+)</option><option value="O-">Nhóm O (-)</option>
+                         <option value="A+">Nhóm A (+)</option><option value="A-">Nhóm A (-)</option>
+                         <option value="B+">Nhóm B (+)</option><option value="B-">Nhóm B (-)</option>
+                         <option value="AB+">Nhóm AB (+)</option><option value="AB-">Nhóm AB (-)</option>
+                         <option value="Không Rõ">Chưa Xét Nghiệm Trực Tiếp</option>
+                      </select>
+                  </div>
+                )}
+                
+                <button onClick={async () => {
+                   try {
+                       const payload = {
+                           userId: user.id || user._id, 
+                           status: 'Đồng Ý',
+                           supportType: supportForm.type,
+                           helperName: supportForm.type === 'Cá nhân hỗ trợ' ? user.name : supportForm.helperName,
+                           helperPhone: supportForm.type === 'Cá nhân hỗ trợ' ? user.phone : supportForm.helperPhone,
+                           helperBloodType: supportForm.type === 'Cá nhân hỗ trợ' ? user.bloodType : supportForm.helperBloodType
+                       };
+                       await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(payload)
+                       });
+                       setBroadcasts(prev => prev.map(old => old.id === activeBroadcastForm.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
+                       setActiveBroadcastForm(null);
+                   } catch(e) {
+                       alert("Lỗi kết nối về trung tâm!");
+                   }
+                }} className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 uppercase tracking-widest text-xs transition-all">
+                   GỬI BÁO CÁO HỖ TRỢ
+                </button>
+             </div>
+          </div>
+        </div>
+      )}
+
       {/* EMERGENCY OVERLAY PUSH */}
       {emergencyAlert && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-6 bg-rose-900/90 backdrop-blur-md animate-in fade-in duration-300">
@@ -432,14 +494,7 @@ const DonorView = () => {
 
                       {!responded ? (
                         <div className="flex gap-2">
-                          <button onClick={async () => {
-                            await fetch(`https://donor-be.onrender.com/api/broadcasts/${b.id}/respond`, {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ userId: user.id || user._id, status: 'Đồng Ý' })
-                            });
-                            setBroadcasts(prev => prev.map(old => old.id === b.id ? { ...old, responders: [...(old.responders || []), { userId: user.id || user._id, status: 'Đồng Ý' }] } : old));
-                          }} className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black py-2 rounded-xl active:scale-95 transition-all">SẴN SÀNG HỖ TRỢ</button>
+                          <button onClick={() => setActiveBroadcastForm(b)} className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black py-2 rounded-xl active:scale-95 transition-all">SẴN SÀNG HỖ TRỢ</button>
                           <button onClick={async () => {
                             await fetch(`https://donor-be.onrender.com/api/broadcasts/${b.id}/respond`, {
                               method: 'POST',

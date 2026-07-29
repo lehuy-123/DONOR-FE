@@ -29,6 +29,7 @@ const HospitalDashboard = () => {
   const [broadcastMsg, setBroadcastMsg] = useState("");
   const [broadcastTarget, setBroadcastTarget] = useState("ALL");
   const [broadcasts, setBroadcasts] = useState([]);
+  const [selectedResponder, setSelectedResponder] = useState(null);
   
   useEffect(() => {
     fetch(`https://donor-be.onrender.com/api/broadcasts`)
@@ -504,19 +505,55 @@ const HospitalDashboard = () => {
                  <p className="text-[10px] uppercase font-bold text-white/50 tracking-widest">Đội Ứng Cứu Đã Phản Hồi ({broadcasts[0].responders?.length || 0})</p>
                  <div className="max-h-40 overflow-y-auto space-y-2 pr-2">
                    {broadcasts[0].responders?.map((r, i) => (
-                      <div key={i} className="bg-white p-2.5 rounded-xl flex items-center justify-between text-xs">
-                         <div className="font-bold text-slate-700 flex gap-2"><span className="text-rose-600">[{r.bloodType}]</span> {r.name}</div>
+                      <button key={i} onClick={() => r.status === 'Đồng Ý' && setSelectedResponder(r)} className={`w-full text-left bg-white p-2.5 rounded-xl flex items-center justify-between text-xs hover:bg-slate-50 transition-colors ${r.status !== 'Đồng Ý' && 'cursor-default'}`}>
+                         <div className="font-bold text-slate-700 flex gap-2 w-full truncate"><span className="text-rose-600">[{r.bloodType}]</span> {r.name}</div>
                          {r.status === 'Đồng Ý' ? (
-                           <span className="bg-emerald-100 text-emerald-600 font-bold px-2 py-1 rounded-md">✅ Sẵn Sàng</span>
+                           <span className="bg-emerald-100 text-emerald-600 font-bold px-2 py-1 rounded-md ml-2 shrink-0">✅ Xem Chi Tiết</span>
                          ) : (
-                           <span className="bg-slate-100 text-slate-500 font-bold px-2 py-1 rounded-md">❌ Từ chối</span>
+                           <span className="bg-slate-100 text-slate-500 font-bold px-2 py-1 rounded-md ml-2 shrink-0">❌ Từ chối</span>
                          )}
-                      </div>
+                      </button>
                    ))}
                  </div>
                </div>
              )}
           </div>
+          
+          {/* MODAL CHI TIẾT RESPONDER FORM */}
+          {selectedResponder && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+               <div className="bg-white max-w-sm w-full rounded-[2rem] p-6 shadow-2xl relative animate-in zoom-in-95 duration-300">
+                  <button onClick={() => setSelectedResponder(null)} className="absolute top-4 right-4 w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-rose-100 hover:text-rose-600 transition-colors">✕</button>
+                  <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mb-4 shadow-inner">
+                    📋
+                  </div>
+                  <h3 className="text-xl font-black text-slate-800 mb-1">Chi Tiết Viện Trợ</h3>
+                  <p className="text-xs font-bold text-emerald-600 mb-6 uppercase tracking-widest">{selectedResponder.supportType || 'Cá nhân hỗ trợ'}</p>
+                  
+                  <div className="space-y-4">
+                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Người Xuất Phát Đi</p>
+                        <p className="text-sm font-bold text-slate-800">{selectedResponder.helperName || selectedResponder.name}</p>
+                     </div>
+                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center">
+                        <div>
+                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Liên Lạc</p>
+                           <p className="text-sm font-bold text-slate-800">{selectedResponder.helperPhone || selectedResponder.phone}</p>
+                        </div>
+                        <a href={`tel:${selectedResponder.helperPhone || selectedResponder.phone}`} className="w-10 h-10 bg-emerald-500 text-white rounded-xl shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all">📞</a>
+                     </div>
+                     <div className="bg-rose-50 text-rose-700 p-4 rounded-2xl border border-rose-100 flex items-center justify-between">
+                        <p className="text-[10px] font-black uppercase tracking-widest">Loại Máu</p>
+                        <p className="text-2xl font-black">{selectedResponder.helperBloodType || selectedResponder.bloodType}</p>
+                     </div>
+                  </div>
+                  
+                  <button onClick={() => setSelectedResponder(null)} className="w-full mt-6 bg-slate-800 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-xs active:scale-95 transition-all">
+                     ĐÃ TIẾP NHẬN BÁO CÁO
+                  </button>
+               </div>
+            </div>
+          )}
 
           <div className="bg-white/60 p-6 rounded-3xl shadow-xl shadow-slate-200/50 border border-white relative overflow-hidden">
             <div className="flex justify-between items-center mb-6">
