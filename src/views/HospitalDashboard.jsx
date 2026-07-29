@@ -790,12 +790,10 @@ const HospitalDashboard = () => {
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Khoảng cách</span>
                   <span className="font-bold text-rose-600 bg-rose-50 px-2 py-1 flex items-center rounded-md text-sm">{selectedDonor.distance ? `${selectedDonor.distance} KM` : 'Đang tính...'}</span>
                 </div>
-                {selectedDonor.etaTime && (
                 <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Di chuyển</span>
-                  <span className="font-bold text-blue-600 bg-blue-50 px-2 flex items-center py-1 rounded-md text-sm">{selectedDonor.etaTime} phút</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Thời gian ETA</span>
+                  <span className="font-bold text-blue-600 bg-blue-50 px-2 flex items-center py-1 rounded-md text-sm">{selectedDonor.etaTime || (selectedDonor.distance ? Math.round(parseFloat(selectedDonor.distance) * 2) : '--')} phút</span>
                 </div>
-                )}
                 <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lịch sử hiến</span>
                   <span className="font-bold text-emerald-600 bg-emerald-50 px-2 flex items-center py-1 rounded-md text-sm">{selectedDonor.donationCount || 0} lần</span>
