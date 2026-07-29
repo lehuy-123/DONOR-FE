@@ -411,11 +411,12 @@ const DonorView = () => {
           </div>
 
           {/* BẢNG TIN KHẨN TOÀN KHU VỰC */}
-          {broadcasts.length > 0 && (
-            <div className="bg-rose-50 border-2 border-rose-200 rounded-3xl p-5 shadow-inner">
-              <h3 className="text-sm font-black text-rose-700 uppercase tracking-widest mb-3 flex items-center gap-2">
-                <span className="animate-pulse">🚨</span> BẢNG TIN KHẨN CẤP
-              </h3>
+          <div className="bg-rose-50 border-2 border-rose-200 rounded-3xl p-5 shadow-inner">
+            <h3 className="text-sm font-black text-rose-700 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <span className="animate-pulse">🚨</span> BẢNG TIN KHẨN CẤP
+            </h3>
+            
+            {broadcasts.length > 0 ? (
               <div className="space-y-3">
                 {broadcasts.map(b => {
                   const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
@@ -457,8 +458,14 @@ const DonorView = () => {
                   );
                 })}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="border-2 border-dashed border-rose-200/50 bg-white/50 rounded-2xl p-6 text-center shadow-inner">
+                <span className="text-3xl grayscale opacity-30">📡</span>
+                <p className="text-sm font-bold text-rose-400 mt-2 uppercase tracking-tight">Khu vực hiện tại đang an toàn</p>
+                <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400 mt-1">Chưa Nhận Lệnh Điều Động Khẩn Từ Các Tuyến</p>
+              </div>
+            )}
+          </div>
 
           {/* MESSAGE ROOM CHUYÊN NGHIỆP */}
           <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col flex-1 min-h-[450px]">
