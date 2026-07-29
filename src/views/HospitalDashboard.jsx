@@ -774,54 +774,54 @@ const HospitalDashboard = () => {
             <button onClick={() => setSelectedDonor(null)} className="absolute top-4 right-4 z-50 w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold">X</button>
 
             {/* Left: Info */}
-            <div className="w-full md:w-5/12 bg-slate-50 p-8 border-r border-slate-200 flex flex-col items-center text-center">
+            <div className="w-full md:w-5/12 bg-slate-50 p-4 sm:p-6 border-r border-slate-200 flex flex-col items-center text-center overflow-y-auto hide-scrollbar max-h-screen">
               <div className="w-24 h-24 bg-gradient-to-br from-slate-700 to-slate-900 shadow-xl shadow-slate-500/30 rounded-full border-4 border-white flex justify-center items-center font-black text-white text-3xl mb-4">
                 {selectedDonor.bloodType}
               </div>
               <h2 className="text-2xl font-black text-slate-800">{selectedDonor.name}</h2>
               <p className="text-sm font-medium text-slate-500 mb-6">{selectedDonor.email}</p>
 
-              <div className="w-full space-y-2 mt-4 text-left">
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">SĐT</span>
-                  <span className="font-bold text-slate-800 text-sm">{selectedDonor.phone}</span>
+              <div className="w-full grid grid-cols-2 gap-2 mt-4 text-left">
+                <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">SĐT</span>
+                  <span className="font-bold text-slate-800 text-xs">{selectedDonor.phone}</span>
                 </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Khoảng cách</span>
-                  <span className="font-bold text-rose-600 bg-rose-50 px-2 py-1 flex items-center rounded-md text-sm">{selectedDonor.distance ? `${selectedDonor.distance} KM` : 'Đang tính...'}</span>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Khoảng cách</span>
+                  <span className="font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-md text-xs w-max">{selectedDonor.distance ? `${selectedDonor.distance} KM` : '...'}</span>
                 </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Thời gian ETA</span>
-                  <span className="font-bold text-blue-600 bg-blue-50 px-2 flex items-center py-1 rounded-md text-sm">{selectedDonor.etaTime || (selectedDonor.distance ? Math.round(parseFloat(selectedDonor.distance) * 2) : '--')} phút</span>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Thời gian ETA</span>
+                  <span className="font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md text-xs w-max">{selectedDonor.etaTime || (selectedDonor.distance ? Math.round(parseFloat(selectedDonor.distance) * 2) : '--')} phút</span>
                 </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lịch sử hiến</span>
-                  <span className="font-bold text-emerald-600 bg-emerald-50 px-2 flex items-center py-1 rounded-md text-sm">{selectedDonor.donationCount || 0} lần</span>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Lịch sử hiến</span>
+                  <span className="font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md text-xs w-max">{selectedDonor.donationCount || 0} lần</span>
                 </div>
                 {selectedDonor.age && (
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Thể Trạng</span>
-                  <span className="font-bold text-slate-800 text-sm">{selectedDonor.age}t / {selectedDonor.weight}kg / {selectedDonor.height}cm</span>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center col-span-2 sm:col-span-1">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Thể Trạng</span>
+                  <span className="font-bold text-slate-800 text-xs">{selectedDonor.age}t / {selectedDonor.weight}kg / {selectedDonor.height}cm</span>
                 </div>
                 )}
                 {selectedDonor.lastDonationDate && (
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Hiến gần nhất</span>
-                  <span className="font-bold text-indigo-600 bg-indigo-50 px-2 flex items-center py-1 rounded-md text-sm">{new Date(selectedDonor.lastDonationDate).toLocaleDateString('vi-VN')}</span>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center col-span-2 sm:col-span-1">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Hiến gần nhất</span>
+                  <span className="font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md text-xs w-max">{new Date(selectedDonor.lastDonationDate).toLocaleDateString('vi-VN')}</span>
                 </div>
                 )}
               </div>
 
-              {/* BẢN ĐỒ MINI XÁC KHẢO VỊ TRÍ VỆ TINH */}
+              {/* BẢN ĐỒ MINI XÁC KHẢO VỊ TRÍ VỆ TINH VÀ LỘ TRÌNH */}
               {selectedDonor.location && (
                 <div className="w-full mt-4 flex flex-col gap-2">
-                  <div className="w-full rounded-2xl overflow-hidden border-2 border-slate-200 shadow-md relative h-48 group animate-in zoom-in-95 duration-700">
+                  <div className="w-full rounded-2xl overflow-hidden border-2 border-slate-200 shadow-md relative h-32 group animate-in zoom-in-95 duration-700">
                     <iframe
                       width="100%" height="100%" frameBorder="0" style={{ border: 0, filter: 'contrast(1.1)' }}
-                      src={`https://maps.google.com/maps?q=${selectedDonor.location.lat},${selectedDonor.location.lng}&z=15&output=embed`}
+                      src={`https://maps.google.com/maps?saddr=${selectedDonor.location.lat},${selectedDonor.location.lng}&daddr=${hospitalUser?.lat},${hospitalUser?.lng}&output=embed`}
                     />
                     <div className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur text-white text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md shadow-lg">
-                      Tọa độ Vệ tinh
+                      Lộ trình Không gian
                     </div>
                   </div>
                   <div className="bg-white border flex items-start gap-2 border-slate-200 rounded-xl p-3 shadow-sm text-left">
