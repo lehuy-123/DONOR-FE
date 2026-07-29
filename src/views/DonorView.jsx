@@ -589,6 +589,82 @@ const DonorView = () => {
             </div>
           </div>
 
+          <div className="bg-rose-50 border-2 border-rose-200 rounded-3xl p-5 shadow-inner">
+            <h3 className="text-sm font-black text-rose-700 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <span className="animate-pulse">🚨</span> BẢNG TIN KHẨN CẤP
+            </h3>
+            {broadcasts.length > 0 ? (
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-1 custom-scrollbar">
+                {broadcasts
+                  .filter(b => {
+                    const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
+                    if (responded && responded.respondedAt) {
+                      return now - new Date(responded.respondedAt).getTime() <= 3 * 60 * 1000;
+                    }
+                    return true;
+                  })
+                  .slice((broadcastPage - 1) * broadcastsPerPage, broadcastPage * broadcastsPerPage)
+                  .map(b => {
+                    const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
+                    return (
+                      <div key={b.id} className="bg-white rounded-2xl p-3 shadow-sm border border-rose-100 flex flex-col gap-2">
+                        <div>
+                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 mb-1">
+                            <span className="bg-rose-600 text-white px-1.5 py-0.5 rounded text-[10px] uppercase">{b.hospitalName}</span>
+                            Cần nhóm máu: <span className="text-rose-600">[{b.bloodTypes.join(', ')}]</span>
+                          </div>
+                          <p className="text-xs font-medium text-slate-700 leading-relaxed">{b.message}</p>
+                        </div>
+
+                        {!responded ? (
+                          <div className="flex gap-2 mt-1">
+                            <button onClick={() => setActiveBroadcastForm(b)} className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-black py-1.5 rounded-lg active:scale-95 transition-all">SẴN SÀNG HỖ TRỢ</button>
+                            <button onClick={async () => {
+                              const payload = { userId: user.id || user._id, status: 'Từ Chối', respondedAt: new Date().toISOString() };
+                              await fetch(`https://donor-be.onrender.com/api/broadcasts/${b.id}/respond`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                              });
+                              setBroadcasts(prev => prev.map(old => old.id === b.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
+                            }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all">TỪ CHỐI</button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2 mt-1">
+                            <div className={`flex-1 text-[11px] font-bold px-2 py-1.5 rounded-lg text-center ${responded.status === 'Đồng Ý' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
+                              {responded.status === 'Đồng Ý' ? '✅ ĐÃ ĐĂNG KÝ HỖ TRỢ' : '❌ ĐÃ TỪ CHỐI'}
+                            </div>
+                            {responded.status === 'Đồng Ý' && (
+                              <button onClick={() => {
+                                setSelectedHospitalId(b.hospitalId);
+                                document.getElementById('chat-room-section')?.scrollIntoView({ behavior: 'smooth' });
+                              }} className="bg-blue-100 hover:bg-blue-200 text-blue-600 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all flex items-center justify-center">
+                                💬 LIÊN LẠC
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                {Math.ceil(broadcasts.length / broadcastsPerPage) > 1 && (
+                  <div className="flex justify-between items-center pt-2">
+                    <button disabled={broadcastPage === 1} onClick={() => setBroadcastPage(prev => Math.max(1, prev - 1))} className="px-3 py-1 rounded bg-white border border-rose-200 text-rose-600 disabled:opacity-50 text-xs font-bold shadow-sm">Trước</button>
+                    <span className="text-xs font-bold text-rose-500">{broadcastPage} / {Math.ceil(broadcasts.length / broadcastsPerPage)}</span>
+                    <button disabled={broadcastPage === Math.ceil(broadcasts.length / broadcastsPerPage)} onClick={() => setBroadcastPage(prev => Math.min(Math.ceil(broadcasts.length / broadcastsPerPage), prev + 1))} className="px-3 py-1 rounded bg-white border border-rose-200 text-rose-600 disabled:opacity-50 text-xs font-bold shadow-sm">Sau</button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-rose-200/50 bg-white/50 rounded-2xl p-6 text-center shadow-inner">
+                <span className="text-3xl grayscale opacity-30">📡</span>
+                <p className="text-sm font-bold text-rose-400 mt-2 uppercase tracking-tight">Khu vực hiện tại đang an toàn</p>
+                <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400 mt-1">Chưa Nhận Lệnh Điều Động Khẩn Từ Các Tuyến</p>
+              </div>
+            )}
+          </div>
+
           {/* GPS & RADAR CHECK */}
           <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 flex flex-col">
             <div className="flex justify-between items-center mb-4">
@@ -687,83 +763,8 @@ const DonorView = () => {
           </div>
 
           {/* BẢNG TIN KHẨN TOÀN KHU VỰC */}
-          <div className="bg-rose-50 border-2 border-rose-200 rounded-3xl p-5 shadow-inner">
-            <h3 className="text-sm font-black text-rose-700 uppercase tracking-widest mb-3 flex items-center gap-2">
-              <span className="animate-pulse">🚨</span> BẢNG TIN KHẨN CẤP
-            </h3>
-            {broadcasts.length > 0 ? (
-              <div className="space-y-3 max-h-96 overflow-y-auto pr-1 custom-scrollbar">
-                {broadcasts
-                  .filter(b => {
-                    const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
-                    if (responded && responded.respondedAt) {
-                      return now - new Date(responded.respondedAt).getTime() <= 3 * 60 * 1000;
-                    }
-                    return true;
-                  })
-                  .slice((broadcastPage - 1) * broadcastsPerPage, broadcastPage * broadcastsPerPage)
-                  .map(b => {
-                    const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
-                    return (
-                      <div key={b.id} className="bg-white rounded-2xl p-3 shadow-sm border border-rose-100 flex flex-col gap-2">
-                        <div>
-                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 mb-1">
-                            <span className="bg-rose-600 text-white px-1.5 py-0.5 rounded text-[10px] uppercase">{b.hospitalName}</span>
-                            Cần nhóm máu: <span className="text-rose-600">[{b.bloodTypes.join(', ')}]</span>
-                          </div>
-                          <p className="text-xs font-medium text-slate-700 leading-relaxed">{b.message}</p>
-                        </div>
 
-                        {!responded ? (
-                          <div className="flex gap-2 mt-1">
-                            <button onClick={() => setActiveBroadcastForm(b)} className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-black py-1.5 rounded-lg active:scale-95 transition-all">SẴN SÀNG HỖ TRỢ</button>
-                            <button onClick={async () => {
-                              const payload = { userId: user.id || user._id, status: 'Từ Chối', respondedAt: new Date().toISOString() };
-                              await fetch(`https://donor-be.onrender.com/api/broadcasts/${b.id}/respond`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(payload)
-                              });
-                              setBroadcasts(prev => prev.map(old => old.id === b.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
-                            }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all">TỪ CHỐI</button>
-                          </div>
-                        ) : (
-                          <div className="flex gap-2 mt-1">
-                            <div className={`flex-1 text-[11px] font-bold px-2 py-1.5 rounded-lg text-center ${responded.status === 'Đồng Ý' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
-                              {responded.status === 'Đồng Ý' ? '✅ ĐÃ ĐĂNG KÝ HỖ TRỢ' : '❌ ĐÃ TỪ CHỐI'}
-                            </div>
-                            {responded.status === 'Đồng Ý' && (
-                              <button onClick={() => {
-                                setSelectedHospitalId(b.hospitalId);
-                                document.getElementById('chat-room-section')?.scrollIntoView({ behavior: 'smooth' });
-                              }} className="bg-blue-100 hover:bg-blue-200 text-blue-600 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all flex items-center justify-center">
-                                💬 LIÊN LẠC
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                {Math.ceil(broadcasts.length / broadcastsPerPage) > 1 && (
-                  <div className="flex justify-between items-center pt-2">
-                    <button disabled={broadcastPage === 1} onClick={() => setBroadcastPage(prev => Math.max(1, prev - 1))} className="px-3 py-1 rounded bg-white border border-rose-200 text-rose-600 disabled:opacity-50 text-xs font-bold shadow-sm">Trước</button>
-                    <span className="text-xs font-bold text-rose-500">{broadcastPage} / {Math.ceil(broadcasts.length / broadcastsPerPage)}</span>
-                    <button disabled={broadcastPage === Math.ceil(broadcasts.length / broadcastsPerPage)} onClick={() => setBroadcastPage(prev => Math.min(Math.ceil(broadcasts.length / broadcastsPerPage), prev + 1))} className="px-3 py-1 rounded bg-white border border-rose-200 text-rose-600 disabled:opacity-50 text-xs font-bold shadow-sm">Sau</button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="border-2 border-dashed border-rose-200/50 bg-white/50 rounded-2xl p-6 text-center shadow-inner">
-                <span className="text-3xl grayscale opacity-30">📡</span>
-                <p className="text-sm font-bold text-rose-400 mt-2 uppercase tracking-tight">Khu vực hiện tại đang an toàn</p>
-                <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400 mt-1">Chưa Nhận Lệnh Điều Động Khẩn Từ Các Tuyến</p>
-              </div>
-            )}
-          </div>
-
-          {/* MESSAGE ROOM CHUYÊN NGHIỆP */}
+                    {/* MESSAGE ROOM CHUYÊN NGHIỆP */}
           <div id="chat-room-section" className="bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col flex-1 min-h-[450px]">
             <div className="px-4 sm:px-8 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
