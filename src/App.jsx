@@ -23,7 +23,7 @@ function App() {
                 to="/"
                 className={({ isActive }) => `px-4 py-2 rounded-full text-sm font-bold uppercase transition-all duration-300 ${isActive ? 'bg-rose-100 text-rose-700 shadow-inner' : 'text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}
               >
-                Khách Hiến
+                DONOR
               </NavLink>
               <NavLink
                 to="/hospital"

@@ -146,6 +146,7 @@ const HospitalDashboard = () => {
   const [inboxUsers, setInboxUsers] = useState([]);
   const [showInbox, setShowInbox] = useState(false);
   const [donorAddress, setDonorAddress] = useState("Đang phân tích định vị không gian...");
+  const [emergencyResponders, setEmergencyResponders] = useState([]);
 
   // Lắng nghe toàn bộ users để gom Hộp Thư
   // Lấy dữ liệu 1 lần lúc vào trang (API cần quét toàn bộ user để lấy history, trong dự án thật sẽ có 1 api /inbox riêng)
@@ -189,8 +190,20 @@ const HospitalDashboard = () => {
       fetchInbox();
     };
 
+    const emergencyResponseListener = (payload) => {
+        setEmergencyResponders(prev => {
+           // Replace if already exists, else add to top
+           const filtered = prev.filter(p => p.user.id !== payload.user.id);
+           return [payload, ...filtered];
+        });
+    };
+
     socket.on('receive-message', messageListener);
-    return () => socket.off('receive-message', messageListener);
+    socket.on('emergency-response', emergencyResponseListener);
+    return () => {
+        socket.off('receive-message', messageListener);
+        socket.off('emergency-response', emergencyResponseListener);
+    };
   }, [hospitalUser, selectedDonor]);
 
   // Nạp lịch sử từ Backend mỗi khi mở Profile Modal
@@ -722,6 +735,33 @@ const HospitalDashboard = () => {
               </div>
 
               <div className="flex flex-col gap-3">
+                {emergencyResponders.length > 0 && (
+                  <div className="mb-2 bg-red-50 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')] p-5 rounded-2xl border-2 border-red-200 shadow-inner">
+                    <h4 className="text-red-700 font-black tracking-widest text-xs uppercase mb-3 flex items-center gap-2"><span className="animate-pulse text-lg">🚨</span> Phản Hồi Lệnh Báo Động Khẩn Cấp</h4>
+                    <div className="flex flex-col gap-3">
+                      {emergencyResponders.map((resp, i) => (
+                        <div key={i} onClick={() => setSelectedDonor(resp.user)} className="bg-white cursor-pointer hover:border-red-300 rounded-xl p-4 shadow-sm border border-red-100 flex items-center justify-between transition-all">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-100 to-rose-200 border-2 border-white shadow-sm flex items-center justify-center font-black text-red-600">
+                               {resp.user.bloodType}
+                            </div>
+                            <div>
+                               <p className="font-bold text-slate-800 text-sm">{resp.user.name}</p>
+                               <p className="text-[10px] font-bold text-slate-400 font-mono mt-0.5">📞 {resp.user.phone}</p>
+                            </div>
+                          </div>
+                          <div className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
+                            resp.status === 'ĐẾN NGAY' ? 'bg-red-500 text-white border-red-600 shadow-md animate-pulse' : 
+                            resp.status === 'CHẤP NHẬN' ? 'bg-blue-600 text-white border-blue-700 shadow-md' : 'bg-slate-100 text-slate-400 border-slate-200'
+                          }`}>
+                            {resp.status}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {processedDonors.map((donor) => {
                   const isOnline = donor.pushSubscription || donor.isOnline;
                   return (

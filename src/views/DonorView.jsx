@@ -150,7 +150,7 @@ const DonorView = () => {
         const dbUser = await loginOrRegisterDonor({ ...loginData, location: finalLocation });
         localStorage.setItem('me_donor', JSON.stringify(dbUser));
         setUser(dbUser);
-        
+
         // Vẫn gọi lại để cập nhật state hoặc fallback nếu cần
         updateLocation(dbUser.id || dbUser._id, true);
       } catch (err) {
@@ -249,93 +249,93 @@ const DonorView = () => {
       {activeBroadcastForm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl relative animate-in zoom-in-95 duration-300">
-             <button onClick={() => setActiveBroadcastForm(null)} className="absolute top-4 right-4 w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-rose-100 hover:text-rose-600 transition-colors">✕</button>
-             <h3 className="text-xl font-black text-slate-800 mb-1">Xác nhận hỗ trợ</h3>
-             <p className="text-xs font-bold text-slate-500 mb-6">Mạng lưới 🚨 {activeBroadcastForm.hospitalName}</p>
-             
-             <div className="space-y-4">
-                <div>
-                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Hình thức hỗ trợ</label>
-                   <select value={supportForm.type} onChange={e => setSupportForm({...supportForm, type: e.target.value})} className="w-full border border-slate-200 bg-slate-50 p-3 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-rose-500">
-                      <option value="Cá nhân hỗ trợ">Tự thân - Sẵn sàng xuất phát</option>
-                      <option value="Giới thiệu người khác">Cử người khác, hoặc có người quen trúng nhóm máu</option>
-                   </select>
+            <button onClick={() => setActiveBroadcastForm(null)} className="absolute top-4 right-4 w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-rose-100 hover:text-rose-600 transition-colors">✕</button>
+            <h3 className="text-xl font-black text-slate-800 mb-1">Xác nhận hỗ trợ</h3>
+            <p className="text-xs font-bold text-slate-500 mb-6">Mạng lưới 🚨 {activeBroadcastForm.hospitalName}</p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Hình thức hỗ trợ</label>
+                <select value={supportForm.type} onChange={e => setSupportForm({ ...supportForm, type: e.target.value })} className="w-full border border-slate-200 bg-slate-50 p-3 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-rose-500">
+                  <option value="Cá nhân hỗ trợ">Tự thân - Sẵn sàng xuất phát</option>
+                  <option value="Giới thiệu người khác">Cử người khác, hoặc có người quen trúng nhóm máu</option>
+                </select>
+              </div>
+
+              {supportForm.type === 'Giới thiệu người khác' && (
+                <div className="space-y-3 p-4 bg-rose-50 border border-rose-100 rounded-xl">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-1">Thông tin người tuyến thay thế</p>
+                  <input type="text" placeholder="Họ và Tên" value={supportForm.helperName} onChange={e => setSupportForm({ ...supportForm, helperName: e.target.value })} className="w-full bg-white border border-rose-200 p-2.5 rounded-lg text-sm text-slate-700 font-medium outline-none focus:ring-2 focus:ring-rose-400" />
+                  <input type="text" placeholder="SĐT Liên lạc" value={supportForm.helperPhone} onChange={e => setSupportForm({ ...supportForm, helperPhone: e.target.value })} className="w-full bg-white border border-rose-200 p-2.5 rounded-lg text-sm text-slate-700 font-medium outline-none focus:ring-2 focus:ring-rose-400" />
+                  <select value={supportForm.helperBloodType} onChange={e => setSupportForm({ ...supportForm, helperBloodType: e.target.value })} className="w-full bg-rose-600 border border-rose-700 text-white p-2.5 rounded-lg text-sm font-black outline-none focus:ring-2 focus:ring-rose-400">
+                    <option value="O+">Nhóm O (+)</option><option value="O-">Nhóm O (-)</option>
+                    <option value="A+">Nhóm A (+)</option><option value="A-">Nhóm A (-)</option>
+                    <option value="B+">Nhóm B (+)</option><option value="B-">Nhóm B (-)</option>
+                    <option value="AB+">Nhóm AB (+)</option><option value="AB-">Nhóm AB (-)</option>
+                    <option value="Không Rõ">Chưa Xét Nghiệm Trực Tiếp</option>
+                  </select>
                 </div>
-                
-                {supportForm.type === 'Giới thiệu người khác' && (
-                  <div className="space-y-3 p-4 bg-rose-50 border border-rose-100 rounded-xl">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-1">Thông tin người tuyến thay thế</p>
-                      <input type="text" placeholder="Họ và Tên" value={supportForm.helperName} onChange={e => setSupportForm({...supportForm, helperName: e.target.value})} className="w-full bg-white border border-rose-200 p-2.5 rounded-lg text-sm text-slate-700 font-medium outline-none focus:ring-2 focus:ring-rose-400" />
-                      <input type="text" placeholder="SĐT Liên lạc" value={supportForm.helperPhone} onChange={e => setSupportForm({...supportForm, helperPhone: e.target.value})} className="w-full bg-white border border-rose-200 p-2.5 rounded-lg text-sm text-slate-700 font-medium outline-none focus:ring-2 focus:ring-rose-400" />
-                      <select value={supportForm.helperBloodType} onChange={e => setSupportForm({...supportForm, helperBloodType: e.target.value})} className="w-full bg-rose-600 border border-rose-700 text-white p-2.5 rounded-lg text-sm font-black outline-none focus:ring-2 focus:ring-rose-400">
-                         <option value="O+">Nhóm O (+)</option><option value="O-">Nhóm O (-)</option>
-                         <option value="A+">Nhóm A (+)</option><option value="A-">Nhóm A (-)</option>
-                         <option value="B+">Nhóm B (+)</option><option value="B-">Nhóm B (-)</option>
-                         <option value="AB+">Nhóm AB (+)</option><option value="AB-">Nhóm AB (-)</option>
-                         <option value="Không Rõ">Chưa Xét Nghiệm Trực Tiếp</option>
-                      </select>
-                  </div>
-                )}
-                
-                {supportForm.type === 'Cá nhân hỗ trợ' ? (
-                   <div className="flex flex-col gap-2">
-                       <button onClick={async () => {
-                          try {
-                              const payload = {
-                                  userId: user.id || user._id, status: 'Đồng Ý', supportType: 'TÔI SẼ ĐẾN NGAY',
-                                  helperName: user.name, helperPhone: user.phone, helperBloodType: user.bloodType,
-                                  helperLat: location?.lat || user.location?.lat || (10.7769 + (Math.random() * 0.1 - 0.05)),
-                                  helperLng: location?.lng || user.location?.lng || (106.7009 + (Math.random() * 0.1 - 0.05)),
-                                  respondedAt: new Date().toISOString()
-                              };
-                              await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
-                                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                 body: JSON.stringify(payload)
-                              });
-                              setBroadcasts(prev => prev.map(old => old.id === activeBroadcastForm.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
-                              setActiveBroadcastForm(null);
-                          } catch(e) { alert("Lỗi kết nối về trung tâm!"); }
-                       }} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-4 rounded-xl shadow-lg shadow-rose-500/30 uppercase tracking-widest text-sm active:scale-95 transition-all text-center flex items-center justify-center gap-2">
-                           🏍️ TÔI SẼ ĐẾN NGAY CÙNG VỊ TRÍ
-                       </button>
-                       <button onClick={async () => {
-                          try {
-                              const payload = {
-                                  userId: user.id || user._id, status: 'Đồng Ý', supportType: supportForm.type,
-                                  helperName: user.name, helperPhone: user.phone, helperBloodType: user.bloodType,
-                                  respondedAt: new Date().toISOString()
-                              };
-                              await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
-                                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                 body: JSON.stringify(payload)
-                              });
-                              setBroadcasts(prev => prev.map(old => old.id === activeBroadcastForm.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
-                              setActiveBroadcastForm(null);
-                          } catch(e) { alert("Lỗi kết nối về trung tâm!"); }
-                       }} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl uppercase tracking-widest text-xs active:scale-95 transition-all">
-                           Chỉ Báo Danh Sẵn Sàng
-                       </button>
-                   </div>
-                ) : (
-                   <button onClick={async () => {
-                      try {
-                          const payload = {
-                              userId: user.id || user._id, status: 'Đồng Ý', supportType: supportForm.type,
-                              helperName: supportForm.helperName, helperPhone: supportForm.helperPhone, helperBloodType: supportForm.helperBloodType,
-                              respondedAt: new Date().toISOString()
-                          };
-                          await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
-                             method: 'POST', headers: { 'Content-Type': 'application/json' },
-                             body: JSON.stringify(payload)
-                          });
-                          setBroadcasts(prev => prev.map(old => old.id === activeBroadcastForm.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
-                          setActiveBroadcastForm(null);
-                      } catch(e) { alert("Lỗi kết nối về trung tâm!"); }
-                   }} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-4 rounded-xl shadow-lg shadow-rose-500/30 uppercase tracking-widest text-sm active:scale-95 transition-all">
-                       ĐĂNG KÝ NGƯỜI CHUYỂN TIẾP
-                   </button>
-                )}
-             </div>
+              )}
+
+              {supportForm.type === 'Cá nhân hỗ trợ' ? (
+                <div className="flex flex-col gap-2">
+                  <button onClick={async () => {
+                    try {
+                      const payload = {
+                        userId: user.id || user._id, status: 'Đồng Ý', supportType: 'TÔI SẼ ĐẾN NGAY',
+                        helperName: user.name, helperPhone: user.phone, helperBloodType: user.bloodType,
+                        helperLat: location?.lat || user.location?.lat || (10.7769 + (Math.random() * 0.1 - 0.05)),
+                        helperLng: location?.lng || user.location?.lng || (106.7009 + (Math.random() * 0.1 - 0.05)),
+                        respondedAt: new Date().toISOString()
+                      };
+                      await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                      });
+                      setBroadcasts(prev => prev.map(old => old.id === activeBroadcastForm.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
+                      setActiveBroadcastForm(null);
+                    } catch (e) { alert("Lỗi kết nối về trung tâm!"); }
+                  }} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-4 rounded-xl shadow-lg shadow-rose-500/30 uppercase tracking-widest text-sm active:scale-95 transition-all text-center flex items-center justify-center gap-2">
+                    🏍️ TÔI SẼ ĐẾN NGAY CÙNG VỊ TRÍ
+                  </button>
+                  <button onClick={async () => {
+                    try {
+                      const payload = {
+                        userId: user.id || user._id, status: 'Đồng Ý', supportType: supportForm.type,
+                        helperName: user.name, helperPhone: user.phone, helperBloodType: user.bloodType,
+                        respondedAt: new Date().toISOString()
+                      };
+                      await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                      });
+                      setBroadcasts(prev => prev.map(old => old.id === activeBroadcastForm.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
+                      setActiveBroadcastForm(null);
+                    } catch (e) { alert("Lỗi kết nối về trung tâm!"); }
+                  }} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl uppercase tracking-widest text-xs active:scale-95 transition-all">
+                    Chỉ Báo Danh Sẵn Sàng
+                  </button>
+                </div>
+              ) : (
+                <button onClick={async () => {
+                  try {
+                    const payload = {
+                      userId: user.id || user._id, status: 'Đồng Ý', supportType: supportForm.type,
+                      helperName: supportForm.helperName, helperPhone: supportForm.helperPhone, helperBloodType: supportForm.helperBloodType,
+                      respondedAt: new Date().toISOString()
+                    };
+                    await fetch(`https://donor-be.onrender.com/api/broadcasts/${activeBroadcastForm.id}/respond`, {
+                      method: 'POST', headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(payload)
+                    });
+                    setBroadcasts(prev => prev.map(old => old.id === activeBroadcastForm.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
+                    setActiveBroadcastForm(null);
+                  } catch (e) { alert("Lỗi kết nối về trung tâm!"); }
+                }} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-4 rounded-xl shadow-lg shadow-rose-500/30 uppercase tracking-widest text-sm active:scale-95 transition-all">
+                  ĐĂNG KÝ NGƯỜI CHUYỂN TIẾP
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -360,9 +360,24 @@ const DonorView = () => {
               </p>
             </div>
 
-            <div className="flex gap-4 w-full">
-              <button onClick={() => setEmergencyAlert(null)} className="flex-1 bg-slate-800 hover:bg-black text-white font-black py-4 rounded-xl shadow-lg active:scale-95 uppercase tracking-widest transition-all">
-                Tôi Đã Hiểu
+            <div className="flex flex-col gap-3 w-full">
+              <button onClick={() => {
+                socket.emit('emergency-response', { hospitalId: emergencyAlert.hospitalId, user: { id: user.id || user._id, name: user.name, phone: user.phone, bloodType: user.bloodType }, status: 'ĐẾN NGAY' });
+                setEmergencyAlert(null);
+              }} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 uppercase tracking-widest transition-all">
+                TÔI SẴN SÀNG ĐẾN NGAY
+              </button>
+              <button onClick={() => {
+                socket.emit('emergency-response', { hospitalId: emergencyAlert.hospitalId, user: { id: user.id || user._id, name: user.name, phone: user.phone, bloodType: user.bloodType }, status: 'CHẤP NHẬN' });
+                setEmergencyAlert(null);
+              }} className="w-full bg-slate-800 hover:bg-black text-white font-black py-4 rounded-xl shadow-lg active:scale-95 uppercase tracking-widest transition-all">
+                CHẤP NHẬN VÀ LIÊN HỆ
+              </button>
+              <button onClick={() => {
+                socket.emit('emergency-response', { hospitalId: emergencyAlert.hospitalId, user: { id: user.id || user._id, name: user.name, phone: user.phone, bloodType: user.bloodType }, status: 'TỪ CHỐI' });
+                setEmergencyAlert(null);
+              }} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold py-4 rounded-xl active:scale-95 uppercase tracking-widest transition-all">
+                TỪ CHỐI
               </button>
             </div>
           </div>
@@ -518,14 +533,14 @@ const DonorView = () => {
               </h3>
               {user.fcmToken || fcmToken ? (
                 <div className="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold py-3 rounded-xl text-xs text-center flex items-center justify-center gap-2 shadow-sm">
-                  ĐÃ KÍCH HOẠT PUSH NOTIFICATION
+                  ACTIVE NOTIFICATION
                 </div>
               ) : (
                 <button onClick={async () => {
                   const token = await requestPermissionAndGetToken(user?.id || user?._id);
                   if (token) setUser({ ...user, fcmToken: token });
                 }} className="w-full bg-slate-800 hover:bg-black text-white font-black py-3 rounded-xl shadow-md text-xs transition-all active:scale-95 flex items-center justify-center gap-2">
-                  KÍCH HOẠT PUSH
+                  CHO PHÉP NHẬN THÔNG BÁO
                   <span className="bg-rose-500 px-1.5 rounded text-[9px] uppercase tracking-wider animate-pulse">Required</span>
                 </button>
               )}
@@ -540,39 +555,39 @@ const DonorView = () => {
           <div className="grid grid-cols-1 gap-4">
             <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
               <div>
-                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Tổng Lượt Hiến Thống Kê</p>
-                 <div className="flex items-center gap-3">
-                    <div className="flex items-end gap-1">
-                      <input 
-                        type="number" 
-                        value={user.donationCount || 0} 
-                        onChange={(e) => {
-                           const val = parseInt(e.target.value) || 0;
-                           setUser(prev => ({ ...prev, donationCount: val }));
-                        }}
-                        className="text-4xl font-black text-rose-600 w-24 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 outline-none text-center focus:ring-2 focus:ring-rose-400 transition-all" 
-                      />
-                      <span className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-2">Lần</span>
-                    </div>
-                    <button 
-                      onClick={async () => {
-                         try {
-                           const val = user.donationCount || 0;
-                           await fetch('https://donor-be.onrender.com/api/users/sync', {
-                              method: 'POST', headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ ...user, donationCount: val, mockId: user.id || user._id })
-                           });
-                           localStorage.setItem('me_donor', JSON.stringify({ ...user, donationCount: val }));
-                           alert('Đã cập nhật số lần hiến máu!');
-                         } catch (err) {
-                           alert('Lỗi khi cập nhật!');
-                         }
+                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Tổng Lượt Hiến Thống Kê</p>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-end gap-1">
+                    <input
+                      type="number"
+                      value={user.donationCount || 0}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        setUser(prev => ({ ...prev, donationCount: val }));
                       }}
-                      className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-black px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all shadow-md"
-                    >
-                      Lưu Lại
-                    </button>
-                 </div>
+                      className="text-4xl font-black text-rose-600 w-24 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 outline-none text-center focus:ring-2 focus:ring-rose-400 transition-all"
+                    />
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-2">Lần</span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const val = user.donationCount || 0;
+                        await fetch('https://donor-be.onrender.com/api/users/sync', {
+                          method: 'POST', headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ ...user, donationCount: val, mockId: user.id || user._id })
+                        });
+                        localStorage.setItem('me_donor', JSON.stringify({ ...user, donationCount: val }));
+                        alert('Đã cập nhật số lần hiến máu!');
+                      } catch (err) {
+                        alert('Lỗi khi cập nhật!');
+                      }
+                    }}
+                    className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-black px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all shadow-md"
+                  >
+                    Lưu Lại
+                  </button>
+                </div>
               </div>
               <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center shadow-inner text-rose-500 text-3xl">🩸</div>
             </div>
@@ -587,62 +602,62 @@ const DonorView = () => {
               <div className="space-y-3 max-h-96 overflow-y-auto pr-1 custom-scrollbar">
                 {broadcasts
                   .filter(b => {
-                      const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
-                      if (responded && responded.respondedAt) {
-                         return now - new Date(responded.respondedAt).getTime() <= 3 * 60 * 1000;
-                      }
-                      return true;
+                    const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
+                    if (responded && responded.respondedAt) {
+                      return now - new Date(responded.respondedAt).getTime() <= 3 * 60 * 1000;
+                    }
+                    return true;
                   })
                   .slice((broadcastPage - 1) * broadcastsPerPage, broadcastPage * broadcastsPerPage)
                   .map(b => {
-                  const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
-                  return (
-                    <div key={b.id} className="bg-white rounded-2xl p-3 shadow-sm border border-rose-100 flex flex-col gap-2">
-                      <div>
-                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 mb-1">
-                          <span className="bg-rose-600 text-white px-1.5 py-0.5 rounded text-[10px] uppercase">{b.hospitalName}</span>
-                          Cần nhóm máu: <span className="text-rose-600">[{b.bloodTypes.join(', ')}]</span>
-                        </div>
-                        <p className="text-xs font-medium text-slate-700 leading-relaxed">{b.message}</p>
-                      </div>
-
-                      {!responded ? (
-                        <div className="flex gap-2 mt-1">
-                          <button onClick={() => setActiveBroadcastForm(b)} className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-black py-1.5 rounded-lg active:scale-95 transition-all">SẴN SÀNG HỖ TRỢ</button>
-                          <button onClick={async () => {
-                            const payload = { userId: user.id || user._id, status: 'Từ Chối', respondedAt: new Date().toISOString() };
-                            await fetch(`https://donor-be.onrender.com/api/broadcasts/${b.id}/respond`, {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify(payload)
-                            });
-                            setBroadcasts(prev => prev.map(old => old.id === b.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
-                          }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all">TỪ CHỐI</button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2 mt-1">
-                          <div className={`flex-1 text-[11px] font-bold px-2 py-1.5 rounded-lg text-center ${responded.status === 'Đồng Ý' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
-                            {responded.status === 'Đồng Ý' ? '✅ ĐÃ ĐĂNG KÝ HỖ TRỢ' : '❌ ĐÃ TỪ CHỐI'}
+                    const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
+                    return (
+                      <div key={b.id} className="bg-white rounded-2xl p-3 shadow-sm border border-rose-100 flex flex-col gap-2">
+                        <div>
+                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 mb-1">
+                            <span className="bg-rose-600 text-white px-1.5 py-0.5 rounded text-[10px] uppercase">{b.hospitalName}</span>
+                            Cần nhóm máu: <span className="text-rose-600">[{b.bloodTypes.join(', ')}]</span>
                           </div>
-                          {responded.status === 'Đồng Ý' && (
-                             <button onClick={() => {
-                               setSelectedHospitalId(b.hospitalId);
-                               document.getElementById('chat-room-section')?.scrollIntoView({ behavior: 'smooth' });
-                             }} className="bg-blue-100 hover:bg-blue-200 text-blue-600 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all flex items-center justify-center">
-                               💬 LIÊN LẠC
-                             </button>
-                          )}
+                          <p className="text-xs font-medium text-slate-700 leading-relaxed">{b.message}</p>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-                
+
+                        {!responded ? (
+                          <div className="flex gap-2 mt-1">
+                            <button onClick={() => setActiveBroadcastForm(b)} className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-black py-1.5 rounded-lg active:scale-95 transition-all">SẴN SÀNG HỖ TRỢ</button>
+                            <button onClick={async () => {
+                              const payload = { userId: user.id || user._id, status: 'Từ Chối', respondedAt: new Date().toISOString() };
+                              await fetch(`https://donor-be.onrender.com/api/broadcasts/${b.id}/respond`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                              });
+                              setBroadcasts(prev => prev.map(old => old.id === b.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
+                            }} className="bg-slate-100 hover:bg-slate-200 text-slate-500 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all">TỪ CHỐI</button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2 mt-1">
+                            <div className={`flex-1 text-[11px] font-bold px-2 py-1.5 rounded-lg text-center ${responded.status === 'Đồng Ý' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
+                              {responded.status === 'Đồng Ý' ? '✅ ĐÃ ĐĂNG KÝ HỖ TRỢ' : '❌ ĐÃ TỪ CHỐI'}
+                            </div>
+                            {responded.status === 'Đồng Ý' && (
+                              <button onClick={() => {
+                                setSelectedHospitalId(b.hospitalId);
+                                document.getElementById('chat-room-section')?.scrollIntoView({ behavior: 'smooth' });
+                              }} className="bg-blue-100 hover:bg-blue-200 text-blue-600 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all flex items-center justify-center">
+                                💬 LIÊN LẠC
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
                 {Math.ceil(broadcasts.length / broadcastsPerPage) > 1 && (
                   <div className="flex justify-between items-center pt-2">
-                     <button disabled={broadcastPage === 1} onClick={() => setBroadcastPage(prev => Math.max(1, prev - 1))} className="px-3 py-1 rounded bg-white border border-rose-200 text-rose-600 disabled:opacity-50 text-xs font-bold shadow-sm">Trước</button>
-                     <span className="text-xs font-bold text-rose-500">{broadcastPage} / {Math.ceil(broadcasts.length / broadcastsPerPage)}</span>
-                     <button disabled={broadcastPage === Math.ceil(broadcasts.length / broadcastsPerPage)} onClick={() => setBroadcastPage(prev => Math.min(Math.ceil(broadcasts.length / broadcastsPerPage), prev + 1))} className="px-3 py-1 rounded bg-white border border-rose-200 text-rose-600 disabled:opacity-50 text-xs font-bold shadow-sm">Sau</button>
+                    <button disabled={broadcastPage === 1} onClick={() => setBroadcastPage(prev => Math.max(1, prev - 1))} className="px-3 py-1 rounded bg-white border border-rose-200 text-rose-600 disabled:opacity-50 text-xs font-bold shadow-sm">Trước</button>
+                    <span className="text-xs font-bold text-rose-500">{broadcastPage} / {Math.ceil(broadcasts.length / broadcastsPerPage)}</span>
+                    <button disabled={broadcastPage === Math.ceil(broadcasts.length / broadcastsPerPage)} onClick={() => setBroadcastPage(prev => Math.min(Math.ceil(broadcasts.length / broadcastsPerPage), prev + 1))} className="px-3 py-1 rounded bg-white border border-rose-200 text-rose-600 disabled:opacity-50 text-xs font-bold shadow-sm">Sau</button>
                   </div>
                 )}
               </div>
