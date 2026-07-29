@@ -395,8 +395,12 @@ const HospitalDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {HOSPITALS.map(h => (
             <div key={h.id} className="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 text-center hover:-translate-y-2 transition-transform duration-300">
-              <div className={`w-20 h-20 mx-auto rounded-full bg-gradient-to-br ${h.color} flex items-center justify-center text-3xl mb-4 shadow-lg`}>
-                🏥
+              <div className={`w-24 h-24 mx-auto rounded-full bg-gradient-to-br ${h.color} flex items-center justify-center text-3xl mb-4 shadow-lg overflow-hidden border-4 border-slate-50`}>
+                {h.avatar ? (
+                  <img src={h.avatar} alt={h.name} className={`w-full h-full ${h.isLogo ? 'object-contain p-3 bg-white' : 'object-cover'}`} />
+                ) : (
+                  <span>🏥</span>
+                )}
               </div>
               <h3 className="text-xl font-black text-slate-800 mb-2">{h.name}</h3>
               <p className="text-xs text-slate-500 font-mono mb-6 border border-slate-100 bg-slate-50 py-1 rounded-xl">📍 {h.lat} , {h.lng}</p>
