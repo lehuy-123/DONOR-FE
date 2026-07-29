@@ -44,7 +44,14 @@ const DonorView = () => {
 
     // Lấy lịch sử chat bằng REST API
     fetch(`https://donor-be.onrender.com/api/users/${user.id}/chats`)
-       .then(res => res.json())
+       .then(res => {
+           if (res.status === 404 || res.status === 401) {
+               localStorage.removeItem('me_donor');
+               window.location.reload();
+               throw new Error("Tài khoản không còn tồn tại trên hệ thống.");
+           }
+           return res.json();
+       })
        .then(data => {
            if (data.chats) {
                setMessages(data.chats);
