@@ -571,6 +571,138 @@ const DonorView = () => {
             </div>
           </div>
 
+          {/* MESSAGE ROOM CHUYÊN NGHIỆP */}
+          <div id="chat-room-section" className="bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col flex-1 min-h-[450px]">
+            <div className="p-4 border-b border-slate-100 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <img src="/hospital_avatar.png" alt="Phòng Trực Ban" className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <select value={selectedHospitalId} onChange={e => setSelectedHospitalId(e.target.value)} className="w-full font-black text-slate-800 text-sm bg-transparent outline-none cursor-pointer hover:text-blue-600 transition-colors truncate">
+                    <option value="choray">Trực Ban: Chợ Rẫy</option>
+                    <option value="nd115">Trực Ban: N.Dân 115</option>
+                    <option value="giadinh">Trực Ban: Gia Định</option>
+                  </select>
+                  <p className="text-[9px] uppercase font-bold text-emerald-500 tracking-widest flex items-center gap-1 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> KÊNH DỮ LIỆU ĐỘC LẬP
+                  </p>
+                </div>
+              </div>
+
+              <button onClick={async () => {
+                await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ text: "🟢 TÔI KHỎE MẠNH! ĐÃ NHẬN TIẾP ĐƯỜNG VÀ SẴN SÀNG DI CHUYỂN NGAY LẬP TỨC.", sender: 'donor', hospitalId: selectedHospitalId })
+                });
+                alert("Đã gửi Báo Cáo Thể Trạng!");
+              }} className="w-full py-2.5 rounded-xl text-[10px] font-black uppercase transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700">
+                ⚡ GỬI BÁO CÁO THỂ TRẠNG
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 flex flex-col relative" style={{ backgroundColor: '#f8fafc', backgroundImage: "url('https://www.transparenttextures.com/patterns/diagmonds-light.png')" }}>
+              {messages.filter(m => m.hospitalId === selectedHospitalId).length === 0 ? (
+                <div className="m-auto flex flex-col items-center justify-center text-center max-w-sm opacity-50">
+                  <span className="text-4xl mb-4 grayscale">💬</span>
+                  <span className="text-sm font-bold text-slate-500">Kênh mã khóa End-to-End đã thành lập</span>
+                  <span className="text-xs font-medium text-slate-400 mt-2">Dữ liệu truyền tải giữa bạn và trạm y tế này hoàn toàn tách biệt khỏi các cơ sở khác.</span>
+                </div>
+              ) : (
+                messages.filter(m => m.hospitalId === selectedHospitalId).map((m, idx) => (
+                  <div key={idx} className={`w-full flex ${m.sender === 'donor' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[75%] rounded-2xl px-5 py-3 text-[15px] font-medium leading-relaxed ${m.sender === 'donor' ? 'bg-gradient-to-br from-rose-500 to-rose-600 text-white rounded-tr-sm shadow-md shadow-rose-200' : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm shadow-sm'
+                      }`}>
+                      {m.sender !== 'donor' && <div className="text-[10px] font-black uppercase tracking-widest text-blue-600/70 mb-1">Bác Sĩ Trực Ban</div>}
+                      {m.text}
+                      {m.image && <img src={m.image} alt="Nội dung đính kèm" className="mt-2 rounded-xl border border-white/20 w-full object-cover max-h-64 shadow-md bg-black/10" />}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="p-3 bg-white border-t border-slate-100 rounded-b-[2rem]">
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                if (!chatMessage.trim() || !user) return;
+                const text = chatMessage;
+                setChatMessage("");
+                await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ text, sender: 'donor', hospitalId: selectedHospitalId })
+                });
+              }} className="flex gap-2 bg-slate-50 border border-slate-100 p-1.5 rounded-2xl relative shadow-inner">
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="bg-slate-200 hover:bg-slate-300 text-slate-600 w-10 flex flex-col pt-0.5 items-center justify-center rounded-xl transition-all shadow-inner active:scale-95 text-lg cursor-pointer">
+                  📷
+                </button>
+                <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = async (event) => {
+                    await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ text: "📷 Hình ảnh rà soát", sender: 'donor', hospitalId: selectedHospitalId, image: event.target.result })
+                    });
+                  };
+                  reader.readAsDataURL(file);
+                }} />
+                <input type="text" value={chatMessage} onChange={e => setChatMessage(e.target.value)} placeholder="Nhắn tin..." className="flex-1 min-w-0 bg-transparent px-2 py-2 outline-none text-xs font-medium text-slate-700 placeholder:text-slate-400" />
+                <button type="submit" className="bg-slate-800 hover:bg-black active:scale-90 text-white p-2 px-3 rounded-xl font-bold text-lg shadow-md transition-all">✨</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+
+        {/* CỘT PHẢI: TRẠNG THÁI VÀ CHAT LIVE (Col 8/12) */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
+
+          {/* STATS TIẾN TRÌNH */}
+          <div className="grid grid-cols-1 gap-4">
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Tổng Lượt Hiến Thống Kê</p>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-end gap-1">
+                    <input
+                      type="number"
+                      value={user.donationCount || 0}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        setUser(prev => ({ ...prev, donationCount: val }));
+                      }}
+                      className="text-4xl font-black text-rose-600 w-24 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 outline-none text-center focus:ring-2 focus:ring-rose-400 transition-all"
+                    />
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-2">Lần</span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const val = user.donationCount || 0;
+                        await fetch('http://localhost:5000/api/users/sync', {
+                          method: 'POST', headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ ...user, donationCount: val, mockId: user.id || user._id })
+                        });
+                        localStorage.setItem('me_donor', JSON.stringify({ ...user, donationCount: val }));
+                        alert('Đã cập nhật số lần hiến máu!');
+                      } catch (err) {
+                        alert('Lỗi khi cập nhật!');
+                      }
+                    }}
+                    className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-black px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all shadow-md"
+                  >
+                    Lưu Lại
+                  </button>
+                </div>
+              </div>
+              <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center shadow-inner text-rose-500 text-3xl">🩸</div>
+            </div>
+          </div>
+
+          {/* BẢNG TIN KHẨN TOÀN KHU VỰC */}
+
           <div className="bg-rose-50 border-2 border-rose-200 rounded-3xl p-5 shadow-inner flex flex-col max-h-[40rem]">
             <h3 className="text-sm font-black text-rose-700 uppercase tracking-widest mb-3 flex items-center gap-2">
               <span className="text-lg">📢</span> BẢNG TIN BỆNH VIỆN
@@ -752,138 +884,6 @@ const DonorView = () => {
             </div>
           </div>
         </div>
-
-        {/* CỘT PHẢI: TRẠNG THÁI VÀ CHAT LIVE (Col 8/12) */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
-
-          {/* STATS TIẾN TRÌNH */}
-          <div className="grid grid-cols-1 gap-4">
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
-              <div>
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Tổng Lượt Hiến Thống Kê</p>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-end gap-1">
-                    <input
-                      type="number"
-                      value={user.donationCount || 0}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        setUser(prev => ({ ...prev, donationCount: val }));
-                      }}
-                      className="text-4xl font-black text-rose-600 w-24 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 outline-none text-center focus:ring-2 focus:ring-rose-400 transition-all"
-                    />
-                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-2">Lần</span>
-                  </div>
-                  <button
-                    onClick={async () => {
-                      try {
-                        const val = user.donationCount || 0;
-                        await fetch('http://localhost:5000/api/users/sync', {
-                          method: 'POST', headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ ...user, donationCount: val, mockId: user.id || user._id })
-                        });
-                        localStorage.setItem('me_donor', JSON.stringify({ ...user, donationCount: val }));
-                        alert('Đã cập nhật số lần hiến máu!');
-                      } catch (err) {
-                        alert('Lỗi khi cập nhật!');
-                      }
-                    }}
-                    className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-black px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all shadow-md"
-                  >
-                    Lưu Lại
-                  </button>
-                </div>
-              </div>
-              <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center shadow-inner text-rose-500 text-3xl">🩸</div>
-            </div>
-          </div>
-
-          {/* BẢNG TIN KHẨN TOÀN KHU VỰC */}
-
-          {/* MESSAGE ROOM CHUYÊN NGHIỆP */}
-          <div id="chat-room-section" className="bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col flex-1 min-h-[450px]">
-            <div className="px-4 sm:px-8 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                <img src="/hospital_avatar.png" alt="Phòng Trực Ban" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border border-slate-200 shadow-sm shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <select value={selectedHospitalId} onChange={e => setSelectedHospitalId(e.target.value)} className="w-full font-black text-slate-800 text-sm sm:text-lg bg-transparent outline-none cursor-pointer hover:text-blue-600 transition-colors truncate">
-                    <option value="choray">Phòng Trực Ban: Chợ Rẫy</option>
-                    <option value="nd115">Phòng Trực Ban: N.Dân 115</option>
-                    <option value="giadinh">Phòng Trực Ban: Nhân Dân Gia Định</option>
-                  </select>
-                  <p className="text-[9px] sm:text-[10px] uppercase font-bold text-emerald-500 tracking-widest flex items-center gap-1.5 mt-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> KÊNH TRUYỀN DỮ LIỆU ĐỘC LẬP
-                  </p>
-                </div>
-              </div>
-
-              <button onClick={async () => {
-                await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
-                  method: 'POST', headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ text: "🟢 TÔI KHỎE MẠNH! ĐÃ NHẬN TIẾP ĐƯỜNG VÀ SẴN SÀNG DI CHUYỂN NGAY LẬP TỨC.", sender: 'donor', hospitalId: selectedHospitalId })
-                });
-                alert("Đã gửi Báo Cáo Thể Trạng!");
-              }} className="w-full sm:w-auto px-4 py-3 sm:py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700">
-                ⚡ BÁO CÁO THỂ TRẠNG
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 flex flex-col relative" style={{ backgroundColor: '#f8fafc', backgroundImage: "url('https://www.transparenttextures.com/patterns/diagmonds-light.png')" }}>
-              {messages.filter(m => m.hospitalId === selectedHospitalId).length === 0 ? (
-                <div className="m-auto flex flex-col items-center justify-center text-center max-w-sm opacity-50">
-                  <span className="text-4xl mb-4 grayscale">💬</span>
-                  <span className="text-sm font-bold text-slate-500">Kênh mã khóa End-to-End đã thành lập</span>
-                  <span className="text-xs font-medium text-slate-400 mt-2">Dữ liệu truyền tải giữa bạn và trạm y tế này hoàn toàn tách biệt khỏi các cơ sở khác.</span>
-                </div>
-              ) : (
-                messages.filter(m => m.hospitalId === selectedHospitalId).map((m, idx) => (
-                  <div key={idx} className={`w-full flex ${m.sender === 'donor' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[75%] rounded-2xl px-5 py-3 text-[15px] font-medium leading-relaxed ${m.sender === 'donor' ? 'bg-gradient-to-br from-rose-500 to-rose-600 text-white rounded-tr-sm shadow-md shadow-rose-200' : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm shadow-sm'
-                      }`}>
-                      {m.sender !== 'donor' && <div className="text-[10px] font-black uppercase tracking-widest text-blue-600/70 mb-1">Bác Sĩ Trực Ban</div>}
-                      {m.text}
-                      {m.image && <img src={m.image} alt="Nội dung đính kèm" className="mt-2 rounded-xl border border-white/20 w-full object-cover max-h-64 shadow-md bg-black/10" />}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="p-4 sm:p-5 bg-white border-t border-slate-100 rounded-b-[2rem]">
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                if (!chatMessage.trim() || !user) return;
-                const text = chatMessage;
-                setChatMessage("");
-                await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ text, sender: 'donor', hospitalId: selectedHospitalId })
-                });
-              }} className="flex gap-2 sm:gap-3 bg-slate-50 border border-slate-200 p-1.5 rounded-2xl relative shadow-inner">
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="bg-slate-200 hover:bg-slate-300 text-slate-600 w-12 flex items-center justify-center rounded-xl transition-all shadow-inner active:scale-95 text-xl cursor-pointer">
-                  📷
-                </button>
-                <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = async (event) => {
-                    await fetch(`http://localhost:5000/api/users/${user?.id || user?._id}/chats`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ text: "📷 Hình ảnh từ rà soát", sender: 'donor', hospitalId: selectedHospitalId, image: event.target.result })
-                    });
-                  };
-                  reader.readAsDataURL(file);
-                }} />
-                <input type="text" value={chatMessage} onChange={e => setChatMessage(e.target.value)} placeholder="Nhắn tin cho Bác sĩ..." className="flex-1 bg-transparent px-4 py-3 outline-none text-sm font-medium text-slate-700 placeholder:text-slate-400" />
-                <button type="submit" className="bg-slate-800 hover:bg-black active:scale-90 text-white p-3 px-6 rounded-xl font-black text-xs uppercase tracking-widest shadow-md transition-all">Gửi Lệnh</button>
-              </form>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   );

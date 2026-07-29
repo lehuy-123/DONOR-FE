@@ -86,8 +86,12 @@ const mockArticles = [
 const MediaView = () => {
   const [schedules, setSchedules] = useState([]);
   const [activeArticle, setActiveArticle] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
+    const savedMe = localStorage.getItem('me_donor');
+    if (savedMe) setUser(JSON.parse(savedMe));
+
     // Fetch danh sách lịch hẹn sắp diễn ra từ backend
     fetch(`http://localhost:5000/api/broadcasts`)
       .then(res => res.json())
@@ -103,7 +107,7 @@ const MediaView = () => {
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 items-start relative z-10 w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
-      
+
       {/* CUỘT BÊN TRÁI: DANH SÁCH BÁO CHÍ (70%) */}
       <div className="w-full lg:w-[65%] flex flex-col gap-6">
         {activeArticle ? (
@@ -123,9 +127,9 @@ const MediaView = () => {
               <img src={activeArticle.image} alt={activeArticle.title} className="w-full h-full object-cover" />
             </div>
             <div className="prose prose-slate max-w-none text-slate-700 leading-loose font-medium text-[15px]">
-               <p className="mb-4">Trong bối cảnh hệ thống y tế đang đối mặt với nhiều thử thách, những chiến dịch y tế khẩn cấp thế này không chỉ mang ý nghĩa bổ sung nguồn dự trữ mà còn lan tỏa một thông điệp mạnh mẽ về sự đoàn kết của toàn xã hội.</p>
-               <p className="mb-4">Hằng năm, hàng ngàn đơn vị máu đã được đóng góp thông qua các tình nguyện viên, giúp duy trì đường sống cho rất nhiều ca cấp cứu nghiêm trọng. Lượng tiêu thụ ngày càng cao đòi hỏi chúng ta phải có những công nghệ bảo quản tốt hơn và sự kết nối thường xuyên hơn giữa cộng đồng.</p>
-               <p>Để tiếp tục duy trì những điều kỳ diệu này, mỗi người dân khỏe mạnh hãy sẵn sàng xắn tay áo, theo dõi lịch hiến thường xuyên trên ứng dụng. Giọt máu của bạn hôm nay chính là nhịp đập ngày mai của những người kém may mắn.</p>
+              <p className="mb-4">Trong bối cảnh hệ thống y tế đang đối mặt với nhiều thử thách, những chiến dịch y tế khẩn cấp thế này không chỉ mang ý nghĩa bổ sung nguồn dự trữ mà còn lan tỏa một thông điệp mạnh mẽ về sự đoàn kết của toàn xã hội.</p>
+              <p className="mb-4">Hằng năm, hàng ngàn đơn vị máu đã được đóng góp thông qua các tình nguyện viên, giúp duy trì đường sống cho rất nhiều ca cấp cứu nghiêm trọng. Lượng tiêu thụ ngày càng cao đòi hỏi chúng ta phải có những công nghệ bảo quản tốt hơn và sự kết nối thường xuyên hơn giữa cộng đồng.</p>
+              <p>Để tiếp tục duy trì những điều kỳ diệu này, mỗi người dân khỏe mạnh hãy sẵn sàng xắn tay áo, theo dõi lịch hiến thường xuyên trên ứng dụng. Giọt máu của bạn hôm nay chính là nhịp đập ngày mai của những người kém may mắn.</p>
             </div>
           </div>
         ) : (
@@ -143,8 +147,8 @@ const MediaView = () => {
                 <img src={mockArticles[0].image} alt={mockArticles[0].title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                 <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <div className="absolute bottom-4 left-6 right-6">
-                   <h3 className="text-white text-xl md:text-3xl font-black mb-2 leading-tight group-hover:text-rose-300 transition-colors">{mockArticles[0].title}</h3>
-                   <p className="text-white/80 text-sm md:text-base font-medium line-clamp-2">{mockArticles[0].summary}</p>
+                  <h3 className="text-white text-xl md:text-3xl font-black mb-2 leading-tight group-hover:text-rose-300 transition-colors">{mockArticles[0].title}</h3>
+                  <p className="text-white/80 text-sm md:text-base font-medium line-clamp-2">{mockArticles[0].summary}</p>
                 </div>
               </div>
             </div>
@@ -179,7 +183,7 @@ const MediaView = () => {
           <h3 className="text-sm font-black text-rose-700 uppercase tracking-widest mb-5 flex items-center gap-2 border-b border-rose-200 pb-3">
             <span className="text-lg">🗓️</span> Lịch Hiến Sắp Tới
           </h3>
-          
+
           <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
             {schedules.length === 0 ? (
               <p className="text-center text-sm font-medium text-slate-500 py-10 opacity-70">
@@ -187,6 +191,7 @@ const MediaView = () => {
               </p>
             ) : (
               schedules.map(b => {
+                const responded = b.responders?.find(r => r.userId === (user?.id || user?._id));
                 const approvedCount = b.responders?.filter(r => r.status === 'Đồng Ý').length || 0;
                 const maxDonors = b.maxDonors || 0;
                 const isFull = maxDonors > 0 && approvedCount >= maxDonors;
@@ -195,7 +200,7 @@ const MediaView = () => {
                   <div key={b.id} className="bg-white rounded-2xl p-4 shadow-sm border border-blue-100 flex flex-col relative overflow-hidden group hover:shadow-md hover:border-blue-300 transition-all cursor-pointer">
                     {/* Background effect */}
                     <div className="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:bg-blue-100 transition-colors"></div>
-                    
+
                     <div className="flex items-center justify-between mb-3 relative z-10">
                       <span className="bg-rose-600 text-white px-2.5 py-1 rounded-md text-[10px] font-black uppercase shadow-sm">
                         {b.hospitalName}
@@ -213,26 +218,60 @@ const MediaView = () => {
                     </div>
 
                     {/* Progress Bar (nếu có giới hạn) */}
-                    <div className="mt-auto bg-slate-50 p-2 rounded-xl border border-slate-100 relative z-10">
-                      <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest mb-1.5">
-                        <span className={isFull ? 'text-rose-500' : 'text-slate-500'}>Slot Đăng Ký</span>
-                        <span className={isFull ? 'text-rose-600' : 'text-blue-600'}>
-                          {approvedCount} / {maxDonors === 0 ? '∞' : maxDonors}
-                        </span>
-                      </div>
-                      {maxDonors > 0 && (
-                        <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full transition-all duration-1000 ${isFull ? 'bg-rose-500' : 'bg-blue-500'}`} 
-                            style={{ width: `${Math.min((approvedCount / maxDonors) * 100, 100)}%` }}
-                          ></div>
+                    <div className="mt-auto bg-slate-50 p-3 rounded-xl border border-slate-100 relative z-10 flex flex-col gap-2">
+                      <div>
+                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest mb-1.5">
+                          <span className={isFull ? 'text-rose-500' : 'text-slate-500'}>Slot Đăng Ký</span>
+                          <span className={isFull ? 'text-rose-600' : 'text-blue-600'}>
+                            {approvedCount} / {maxDonors === 0 ? '∞' : maxDonors}
+                          </span>
                         </div>
-                      )}
-                      
-                      {isFull ? (
-                        <p className="text-[9px] text-rose-500 font-bold uppercase mt-2 text-center bg-rose-50 py-1 rounded border border-rose-100">🚫 Đã Đủ Người</p>
+                        {maxDonors > 0 && (
+                          <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-1000 ${isFull ? 'bg-rose-500' : 'bg-blue-500'}`}
+                              style={{ width: `${Math.min((approvedCount / maxDonors) * 100, 100)}%` }}
+                            ></div>
+                          </div>
+                        )}
+                      </div>
+
+                      {isFull && !responded ? (
+                        <p className="text-[9px] text-rose-500 font-bold uppercase mt-1 text-center bg-rose-50 py-1.5 rounded border border-rose-100">🚫 Đã Đủ Người</p>
+                      ) : !user ? (
+                        <p className="text-[9px] text-slate-500 font-bold uppercase mt-1 text-center bg-slate-100 py-1.5 rounded border border-slate-200">Đăng Nhập Để Đặt Lịch</p>
+                      ) : responded ? (
+                        <div className={`flex-1 text-[11px] font-bold px-2 py-1.5 rounded-lg text-center ${responded.status === 'Đồng Ý' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
+                          {responded.status === 'Đồng Ý' ? '✅ ĐÃ LƯU XÁC NHẬN' : '❌ ĐÃ BỎ QUA'}
+                        </div>
                       ) : (
-                        <p className="text-[9px] text-blue-500 font-bold uppercase mt-2 text-center bg-blue-50 py-1 rounded border border-blue-100">👉 Nhấn vào "DONOR" để Đăng ký</p>
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation(); // Ngăn click vào card
+                            if (window.confirm('Xác nhận đăng ký lịch hẹn hiến máu này?')) {
+                              const payload = {
+                                userId: user.id || user._id,
+                                name: user.name,
+                                phone: user.phone,
+                                bloodType: user.bloodType,
+                                status: 'Đồng Ý',
+                                supportType: 'Đăng ký Lịch hẹn',
+                                respondedAt: new Date().toISOString()
+                              };
+                              try {
+                                await fetch(`http://localhost:5000/api/broadcasts/${b.id}/respond`, {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify(payload)
+                                });
+                                setSchedules(prev => prev.map(old => old.id === b.id ? { ...old, responders: [...(old.responders || []), payload] } : old));
+                              } catch (err) { console.error(err); }
+                            }
+                          }}
+                          className="w-full text-white text-[11px] font-black py-2 rounded-lg active:scale-95 transition-all bg-blue-600 hover:bg-blue-700 shadow-sm mt-1"
+                        >
+                          ĐĂNG KÝ LỊCH NÀY
+                        </button>
                       )}
                     </div>
                   </div>
