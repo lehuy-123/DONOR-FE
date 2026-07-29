@@ -6,8 +6,8 @@ import { io } from "socket.io-client";
 // Khởi tạo Socket.io client kết nối tới Node.js Backend
 const socket = io("https://donor-be.onrender.com");
 const HOSPITALS = [
-  { id: 'choray', name: 'Bệnh Viện Chợ Rẫy', lat: 10.7583, lng: 106.6570, color: 'from-blue-700 to-blue-900' },
-  { id: 'nd115', name: 'Nhân Dân 115', lat: 10.7758, lng: 106.6666, color: 'from-emerald-700 to-emerald-900' },
+  { id: 'choray', name: 'Bệnh Viện Chợ Rẫy', lat: 10.7583, lng: 106.6570, color: 'from-blue-700 to-blue-900', avatar: '/bvchoray.png', isLogo: true },
+  { id: 'nd115', name: 'Nhân Dân 115', lat: 10.7758, lng: 106.6666, color: 'from-emerald-700 to-emerald-900', avatar: '/bv115.png', isLogo: true },
   { id: 'giadinh', name: 'Nhân Dân Gia Định', lat: 10.8062, lng: 106.6917, color: 'from-rose-800 to-rose-900', avatar: '/bvgiadinh.jpg' }
 ];
 
@@ -425,9 +425,9 @@ const HospitalDashboard = () => {
               <div className="flex justify-between items-start mb-6">
                 <h2 className="text-2xl font-black bg-clip-text flex items-center gap-4">
                   {hospitalUser.avatar ? (
-                    <img src={hospitalUser.avatar} alt="Avatar" className="w-16 h-16 object-cover shadow-2xl rounded-2xl bg-white/10 p-1 backdrop-blur-sm border border-white/20" />
+                    <img src={hospitalUser.avatar} alt="Avatar" className={`w-36 h-20 sm:w-48 sm:h-24 shadow-2xl rounded-2xl p-1.5 backdrop-blur-sm border-2 ${hospitalUser.isLogo ? 'object-contain bg-white border-white/50' : 'object-cover bg-white/10 border-white/30'}`} />
                   ) : (
-                    <span className="text-4xl shadow-2xl rounded-2xl bg-white/10 p-3 backdrop-blur-sm border border-white/20">🏥</span>
+                    <span className="text-5xl shadow-2xl rounded-2xl bg-white/10 p-4 backdrop-blur-sm border-2 border-white/30">🏥</span>
                   )}
                   <div>
                     {hospitalUser.name}
