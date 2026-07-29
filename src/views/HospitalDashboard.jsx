@@ -612,38 +612,42 @@ const HospitalDashboard = () => {
                     etaInfo = { km, time: Math.ceil(km * 2) };
                   }
                   return (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {etaInfo && (
                         <>
-                          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-2xl flex items-center justify-between shadow-lg shadow-blue-500/30">
+                          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 rounded-xl flex items-center justify-between shadow-md">
                             <div>
-                              <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-1">Đang Di Chuyển</p>
-                              <p className="text-xl font-black">{etaInfo.time} <span className="text-sm font-medium">phút</span></p>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-0.5">Đang Di Chuyển</p>
+                              <p className="text-lg font-black">{etaInfo.time} <span className="text-xs font-medium">phút</span></p>
                             </div>
                             <div className="text-right">
-                              <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-1">Khoảng Cách</p>
-                              <p className="text-lg font-bold">{etaInfo.km} <span className="text-xs font-medium">KM</span></p>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-0.5">Khoảng Cách</p>
+                              <p className="text-base font-bold">{etaInfo.km} <span className="text-[10px] font-medium">KM</span></p>
                             </div>
                           </div>
-                          <div className="w-full h-32 rounded-2xl overflow-hidden border border-slate-200 shadow-inner relative isolate pointer-events-none">
+                          <div className="w-full h-20 rounded-xl overflow-hidden border border-slate-200 shadow-inner relative isolate pointer-events-none">
                             <iframe width="100%" height="100%" frameBorder="0" style={{ border: 0, filter: 'contrast(1.2)' }} src={`https://maps.google.com/maps?q=${selectedResponder.helperLat},${selectedResponder.helperLng}&z=15&output=embed`} />
                           </div>
                         </>
                       )}
-                      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Người Xuất Phát Đi</p>
-                        <p className="text-sm font-bold text-slate-800">{selectedResponder.helperName || selectedResponder.name}</p>
-                      </div>
-                      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center">
-                        <div>
-                          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Liên Lạc</p>
-                          <p className="text-sm font-bold text-slate-800">{selectedResponder.helperPhone || selectedResponder.phone}</p>
+                      
+                      <div className="flex gap-3">
+                        <div className="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Người Đi</p>
+                          <p className="text-xs font-bold text-slate-800 truncate">{selectedResponder.helperName || selectedResponder.name}</p>
                         </div>
-                        <a href={`tel:${selectedResponder.helperPhone || selectedResponder.phone}`} className="w-10 h-10 bg-emerald-500 text-white rounded-xl shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all">📞</a>
+                        <div className="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-100 flex justify-between items-center">
+                          <div>
+                            <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Liên Lạc</p>
+                            <p className="text-xs font-bold text-slate-800">{selectedResponder.helperPhone || selectedResponder.phone}</p>
+                          </div>
+                          <a href={`tel:${selectedResponder.helperPhone || selectedResponder.phone}`} className="w-7 h-7 bg-emerald-500 text-white rounded-lg shadow-sm flex items-center justify-center hover:scale-105 active:scale-95 transition-all text-xs">📞</a>
+                        </div>
                       </div>
-                      <div className="bg-rose-50 text-rose-700 p-4 rounded-2xl border border-rose-100 flex items-center justify-between">
-                        <p className="text-[10px] font-black uppercase tracking-widest">Loại Máu</p>
-                        <p className="text-2xl font-black">{selectedResponder.helperBloodType || selectedResponder.bloodType}</p>
+
+                      <div className="bg-rose-50 text-rose-700 p-3 rounded-xl border border-rose-100 flex items-center justify-between">
+                        <p className="text-[10px] font-black uppercase tracking-widest">Nhóm Máu Trợ Lực</p>
+                        <p className="text-xl font-black">{selectedResponder.helperBloodType || selectedResponder.bloodType}</p>
                       </div>
                     </div>
                   )
@@ -845,7 +849,7 @@ const HospitalDashboard = () => {
 
       {/* MODAL CHI TIẾT VÀ CHAT */}
       {selectedDonor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[2rem] shadow-2xl flex flex-col md:flex-row relative animate-in zoom-in-95 duration-300">
 
             {/* Nut tat */}
